@@ -1,0 +1,235 @@
+<html>
+  <head>
+	<title>Ijod</title>
+	<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="referrer" content="none" />
+	<style>
+	  ::-webkit-scrollbar { width: 8px; }
+	  ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+	  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); }
+
+	  html, body {
+		  margin: 0;
+		  padding: 0;
+		  width: 100vw;
+		  height: 100vh;
+		  display: flex;
+		  flex-flow: column;
+		  font-family: Consolas, Hack, Monaco, monospace, monospace;
+		  font-size: 12px;
+		  min-width: 512px;
+	  }
+
+	  main, aside {
+		  position: absolute;
+	  }
+	  
+	  main {
+		  background: black;
+		  flex-grow: 1;
+		  height: 100%;
+		  width: calc(100% - 256px);
+		  min-width: 256px;
+	  }
+
+	  main > video {
+		  width: 100%;
+		  height: 100%;
+	  }
+
+	  aside {
+		  background: whitesmoke;
+		  width: 256px;
+		  height: 100%;
+		  border-left: 1px solid gray;
+		  display: flex;
+		  flex-flow: column;
+		  align-self: flex-end;
+	  }
+	  
+	  aside > header {
+		  margin: 0;
+		  padding: 12px;
+		  border-bottom: 1px solid gray;
+	  }
+
+	  aside > header { background: turquoise; }
+	  aside > header:after { content: "Select a Video~"; }
+	  
+	  aside > header:hover { background: coral; cursor: pointer; }
+	  aside > header:hover:after { content: "Force Sync!"; }
+
+	  aside > header.loading {
+		  background: turquoise;
+		  cursor: default;
+	  }
+	  aside > header.loading:after {
+		  content: "Loading...";
+	  }
+	  
+	  aside > ul#list {
+		  list-style: none;
+		  flex: 1;
+		  padding: 0;
+		  margin: 0;
+		  overflow-y: auto;
+		  margin: 0;
+	  }
+
+	  aside > ul#list > li {
+		  padding: 8px;
+		  word-break: break-all;
+	  }
+	  aside > ul#list > li:hover {
+		  background: gainsboro;
+		  cursor: pointer;
+	  }
+	  aside > ul#list > li.selected {
+		  font-weight: bold;
+	  }
+	  
+	  aside > #log {
+		  background: black;
+		  color: white;
+		  margin: 0;
+		  padding: 12px;
+		  width: calc(100% - 24px);
+		  height: 128px;
+		  overflow-wrap: break-word;
+		  overflow-y: auto;
+		  border-top: 1px solid gray;
+		  align-self: flex-end;
+		  font-family: monospace, monospace;
+	  }
+
+	  aside > #log > li {
+		  list-style: none;
+	  }
+
+	  aside > #log > li:hover {
+		  color: gray;
+	  }
+	  
+	  aside > header, aside > ul, aside > footer {
+		  -webkit-user-select: none; /* Safari */
+		  -moz-user-select: none; /* Firefox */
+		  -ms-user-select: none; /* IE10+/Edge */
+		  user-select: none; /* Standard */
+	  }
+	</style>
+  </head>
+  <body>
+	<main>
+	  <!-- poster="https://zge.us.to/img/awake.jpg" -->
+	  <video id="video" controls>
+		Oh no! This browser doesn’t support HTML video.
+	  </video>
+	</main>
+	<aside>
+	  <header id="sync"></header>
+	  <ul id="list"></ul>
+	  <!-- contenteditable="true" -->
+	  <ul id="log"></ul>		
+	</aside>
+  </body>
+  <script>
+	"use strict";
+	const video = document.getElementById("video");
+	const list = document.getElementById("list");
+	const header = document.getElementById("sync");
+	const log = document.getElementById("log");
+
+	const socket = new WebSocket(
+		"ws://" + location.hostname + ":" + location.port + "/socket"
+	);
+
+	var uid = -1, fsync = false;
+	
+	function send(name, data) {
+		socket.send(JSON.stringify({
+			"name": name,
+			"data": data
+		}));
+	}
+
+	function logmsg(msg) {
+		let li = document.createElement("li");
+		li.innerHTML = msg;
+		log.appendChild(li);
+		log.scrollTop = log.scrollHeight - 12;
+	}
+
+	function select(path) {
+		video.src = "/data/" + path;
+		video.load();
+		video.currentTime = 0;
+		header.classList.add("loading");
+		for (var i = 0; i < list.children.length; i++) {
+			var item = list.children[i];
+			if (item.innerText == path)
+				item.classList.add("selected");
+			else  item.classList.remove("selected");
+		}
+	}
+
+	socket.onmessage = evt => {
+		var msg = JSON.parse(evt.data);
+		try {
+			switch (msg.name) {
+			case "list":
+				while(list.firstChild)
+					list.removeChild(list.firstChild);
+				msg.data.map(name => {
+					let li = document.createElement("li");
+					li.appendChild(document.createTextNode(name));
+					li.onclick = _ => send("select", name);
+					list.appendChild(li);
+				});
+				break;
+			case "pause":
+				if (msg.from != uid) {
+					logmsg("Paused video");
+					video.pause();
+				}
+				break;
+			case "play":
+				if (msg.from != uid) {
+					logmsg("Continued playback");
+					video.play();
+				}
+				header.classList.remove("loading");
+				fsync = false;
+				break;
+			case "fsync":
+				video.pause();
+				fsync = true;
+				break;
+			case "time":
+				if (msg.data) {
+					logmsg(msg.data < video.currentTime ?
+						   "Jumped backwards" :
+						   "Jumped forwards");
+					video.currentTime = msg.data;
+				}
+				break;
+			case "uid": uid = msg.data; break
+			case "select": select(msg.data); break;
+			case "msg": logmsg(msg.data); break;
+			case "pos": send("pos", video.currentTime); break;
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	socket.onopen = _ => send("join");
+	socket.onerror = console.log;
+	window.onclose = _ => logmsg("<em>connection aborted!</em>");
+	video.onplay = _ => send("play", video.currentTime);
+	video.onwaiting = video.onstalled = video.onseeked = video.onpause =
+	_ => send("pause", video.currentTime);
+	video.oncanplay = _ => send("ready");
+	header.onclick = _ => fsync || send("fsync", video.currentTime);
+	</script>
+</html>
