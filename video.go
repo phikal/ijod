@@ -38,7 +38,7 @@ func init() {
 				log.Fatal(err)
 			}
 
-			for _, u := range users {
+			for u := range users {
 				u.listVideos()
 			}
 		}
@@ -87,9 +87,6 @@ func (v *Video) pause(from *User) {
 		return
 	}
 
-	v.Lock()
-	defer v.Unlock()
-
 	send("pause", nil, from)
 	v.playing = false
 }
@@ -102,9 +99,6 @@ func (v *Video) play(from *User) {
 	if v == nil || v.playing || v.fsyncing {
 		return
 	}
-
-	v.Lock()
-	defer v.Unlock()
 
 	send("play", nil, from)
 	v.playing = true
@@ -119,23 +113,26 @@ func (v *Video) jumpTo(pos float64, from *User) {
 	v.Lock()
 	defer v.Unlock()
 
-	if time.Since(v.updated) < time.Second {
+	if time.Since(v.updated) < time.Millisecond*10 {
 		return
 	}
 
-	// v.pause(from)
+	v.pause(from)
 	v.updated = time.Now()
 	send("time", pos, from)
 }
 
 func (v *Video) startp() {
+	v.Lock()
+	defer v.Unlock()
+
 	all := true
-	for _, u := range users {
+	for u := range users {
 		all = all && u.ready
 	}
 
 	if all {
-		for _, u := range users {
+		for u := range users {
 			u.ready = false
 		}
 		v.fsyncing = false

@@ -1,19 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"sort"
-	"sync/atomic"
 	"time"
 )
 
 var (
-	uidc  uint64
-	users []*User
+	uidc  uint
+	users = make(map[*User]bool)
 )
 
 type User struct {
-	id    uint64
+	id    uint
 	msgs  chan Message
 	ready bool
 	pos   *time.Duration
@@ -21,27 +21,27 @@ type User struct {
 
 // newUser adds a new user to room
 func newUser() *User {
-	u := &User{
-		id:   atomic.AddUint64(&uidc, 1),
-		msgs: make(chan Message, 1<<4),
-	}
+	u := &User{msgs: make(chan Message, 1<<4)}
 
 	vlock.Lock()
-	users = append(users, u)
+	users[u] = true
+	uidc += 1
 	vlock.Unlock()
+	u.id = uidc
+
 	u.send("msg", "Ijod v1", nil)
 	u.send("msg", "<em>Here be dragons...</em>", nil)
 	return u
 }
 
-//
+// send a message to all users
 func send(name string, data interface{}, from *User) {
-	for _, u := range users {
+	for u := range users {
 		u.send(name, data, from)
 	}
 }
 
-//
+// send a message to a specific user
 func (u *User) send(name string, data interface{}, from *User) {
 	msg := Message{
 		"name": name,
@@ -56,12 +56,7 @@ func (u *User) send(name string, data interface{}, from *User) {
 // leave cleans up after a user has closed his connection
 func (u *User) leave() {
 	vlock.Lock()
-	for i, w := range users {
-		if w == u {
-			users = append(users[:i], users[i+1:]...)
-			break
-		}
-	}
+	delete(users, u)
 	vlock.Unlock()
 }
 
@@ -98,24 +93,38 @@ func (u *User) setPos(pos time.Duration) {
 	u.pos = &pos
 
 	ready := 0
-	for _, w := range users {
+	for w := range users {
 		if w.pos != nil {
 			ready++
 		}
 	}
 
-	log.Println(ready, len(users))
 	if ready+2 >= len(users) {
 		var avg time.Duration
-		for _, u := range users {
+		for u := range users {
 			if u.pos != nil {
 				avg += *u.pos
 				u.pos = nil
 			}
 		}
 		avg /= time.Duration(len(users))
+
+		fmt.Println(cvid, avg)
 		if cvid != nil {
-			(<-waiting).sendStatus(&avg)
+			select {
+			case user := <-waiting:
+				user.sendStatus(&avg)
+			case <-time.NewTimer(time.Second).C:
+				log.Println("No status received after a second")
+			}
+		} else {
+			// user := <-waiting
+			select {
+			case user := <-waiting:
+				user.sendStatus(&avg)
+			case <-time.NewTimer(time.Second).C:
+				log.Println("No status received after a second")
+			}
 		}
 	}
 }

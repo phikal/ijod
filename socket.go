@@ -27,7 +27,7 @@ func socket(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		for msg := range user.msgs {
-			log.Printf("%d sending %v", user.id, msg)
+			// log.Printf("%d sending %v", user.id, msg)
 			err := conn.WriteJSON(msg)
 			if err != nil {
 				log.Println(err)
@@ -35,15 +35,13 @@ func socket(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	var msg Message
 	for {
-		var msg Message
-		err = conn.ReadJSON(&msg)
-
-		if err != nil {
+		if err = conn.ReadJSON(&msg); err != nil {
 			log.Println(err)
 			break
 		} else {
-			log.Printf("%d reciving %v", user.id, msg)
+			// log.Printf("%d reciving %v", user.id, msg)
 			name, ok1 := msg["name"]
 			op, ok2 := name.(string)
 			if ok1 && ok2 {

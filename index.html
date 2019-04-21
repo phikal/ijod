@@ -24,7 +24,7 @@
 	  main, aside {
 		  position: absolute;
 	  }
-	  
+
 	  main {
 		  background: black;
 		  flex-grow: 1;
@@ -47,7 +47,7 @@
 		  flex-flow: column;
 		  align-self: flex-end;
 	  }
-	  
+
 	  aside > header {
 		  margin: 0;
 		  padding: 12px;
@@ -56,7 +56,7 @@
 
 	  aside > header { background: turquoise; }
 	  aside > header:after { content: "Select a Video~"; }
-	  
+
 	  aside > header:hover { background: coral; cursor: pointer; }
 	  aside > header:hover:after { content: "Force Sync!"; }
 
@@ -67,7 +67,7 @@
 	  aside > header.loading:after {
 		  content: "Loading...";
 	  }
-	  
+
 	  aside > ul#list {
 		  list-style: none;
 		  flex: 1;
@@ -88,7 +88,7 @@
 	  aside > ul#list > li.selected {
 		  font-weight: bold;
 	  }
-	  
+
 	  aside > #log {
 		  background: black;
 		  color: white;
@@ -110,7 +110,7 @@
 	  aside > #log > li:hover {
 		  color: gray;
 	  }
-	  
+
 	  aside > header, aside > ul, aside > footer {
 		  -webkit-user-select: none; /* Safari */
 		  -moz-user-select: none; /* Firefox */
@@ -144,9 +144,10 @@
 		"ws://" + location.hostname + ":" + location.port + "/socket"
 	);
 
-	var uid = -1, fsync = false;
-	
+	var uid = -1;
+
 	function send(name, data) {
+		console.log(name, data);
 		socket.send(JSON.stringify({
 			"name": name,
 			"data": data
@@ -175,6 +176,7 @@
 
 	socket.onmessage = evt => {
 		var msg = JSON.parse(evt.data);
+		console.log("got: ", msg);
 		try {
 			switch (msg.name) {
 			case "list":
@@ -188,35 +190,41 @@
 				});
 				break;
 			case "pause":
-				if (msg.from != uid) {
+				if (msg.from != uid &&
+					uid != -1 &&
+					!video.paused) {
 					logmsg("Paused video");
 					video.pause();
 				}
 				break;
 			case "play":
-				if (msg.from != uid) {
+				if (msg.from != uid &&
+					uid != -1 &&
+					video.paused) {
 					logmsg("Continued playback");
 					video.play();
 				}
 				header.classList.remove("loading");
-				fsync = false;
-				break;
-			case "fsync":
-				video.pause();
-				fsync = true;
 				break;
 			case "time":
-				if (msg.data) {
+				if (msg.data &&
+					Math.abs(msg.data - video.currentTime) > 0.15) {
 					logmsg(msg.data < video.currentTime ?
 						   "Jumped backwards" :
 						   "Jumped forwards");
 					video.currentTime = msg.data;
 				}
 				break;
+			case "fsync":
+				// incomplete
+				break;
 			case "uid": uid = msg.data; break
 			case "select": select(msg.data); break;
 			case "msg": logmsg(msg.data); break;
 			case "pos": send("pos", video.currentTime); break;
+			default:
+				logmsg("Recieved unknown message: <code>" +
+					   msg + "</code>");
 			}
 		} catch (e) {
 			console.log(e);
@@ -224,12 +232,11 @@
 	}
 
 	socket.onopen = _ => send("join");
-	socket.onerror = console.log;
+	socket.onerror = logmsg;
 	window.onclose = _ => logmsg("<em>connection aborted!</em>");
 	video.onplay = _ => send("play", video.currentTime);
-	video.onwaiting = video.onstalled = video.onseeked = video.onpause =
-	_ => send("pause", video.currentTime);
+	video.onseeked = video.onpause = _ => send("pause", video.currentTime);
 	video.oncanplay = _ => send("ready");
-	header.onclick = _ => fsync || send("fsync", video.currentTime);
-	</script>
+	header.onclick = _ => send("fsync", video.currentTime);
+  </script>
 </html>

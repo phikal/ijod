@@ -10,12 +10,6 @@ type Message map[string]interface{}
 // Process selects an operation to execute, depending on the value of
 // OP.
 func (u *User) process(op string, data interface{}) {
-	jump := func(d interface{}) {
-		if pos, ok := d.(float64); ok {
-			cvid.jumpTo(pos, u)
-		}
-	}
-
 	switch op {
 	case "fsync":
 		if cvid != nil {
@@ -26,7 +20,7 @@ func (u *User) process(op string, data interface{}) {
 		u.ready = true
 		cvid.startp()
 	case "join":
-		for _, w := range users {
+		for w := range users {
 			if u != w {
 				w.send("pos", nil, u)
 			}
@@ -36,7 +30,7 @@ func (u *User) process(op string, data interface{}) {
 		} else {
 			u.sendStatus(nil)
 		}
-		log.Println(u, "joined")
+		log.Println(u.id, "joined")
 	case "pos":
 		if val, ok := data.(float64); ok {
 			pos := time.Duration(float64(time.Second) * val)
@@ -49,6 +43,8 @@ func (u *User) process(op string, data interface{}) {
 	case "play":
 		cvid.play(u)
 	case "pause":
-		jump(data)
+		if pos, ok := data.(float64); ok {
+			cvid.jumpTo(pos, u)
+		}
 	}
 }
