@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"sort"
 	"time"
 )
 
@@ -72,17 +71,15 @@ func (u *User) sendStatus(pos *time.Duration) {
 // listVideos sends a list of all available videos back to the client
 // that requested it
 func (u *User) listVideos() {
-	var buf []string
-	for vid := range videos {
-		buf = append(buf, vid)
-	}
-	sort.Strings(buf)
 	u.msgs <- Message{
 		"name": "list",
-		"data": buf,
+		"data": videos,
 	}
 }
 
+// setPos is used by the client to inform the server of the current
+// their position. If they are the last to report their time, the mean
+// progress is calculated and sent to the waiting user.
 func (u *User) setPos(pos time.Duration) {
 	vlock.Lock()
 	defer vlock.Unlock()
@@ -106,20 +103,11 @@ func (u *User) setPos(pos time.Duration) {
 		}
 		avg /= time.Duration(len(users))
 
-		if cvid != nil {
-			select {
-			case user := <-waiting:
-				user.sendStatus(&avg)
-			case <-time.NewTimer(time.Second).C:
-				log.Println("No status received after a second")
-			}
-		} else {
-			select {
-			case user := <-waiting:
-				user.sendStatus(&avg)
-			case <-time.NewTimer(time.Second).C:
-				log.Println("No status received after a second")
-			}
+		select {
+		case user := <-waiting:
+			user.sendStatus(&avg)
+		case <-time.NewTimer(time.Second).C:
+			log.Println("No status received after a second")
 		}
 	}
 }

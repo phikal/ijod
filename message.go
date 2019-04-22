@@ -33,7 +33,10 @@ func (u *User) process(op string, data interface{}) {
 		}
 	case "select":
 		if name, ok := data.(string); ok {
-			selectVideo(name, u)
+			err := selectVideo(name, u)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	case "play":
 		cvid.play(u)

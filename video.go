@@ -1,18 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
-	"log"
-	"os"
-	"os/signal"
-	"path/filepath"
 	"sync"
-	"syscall"
 	"time"
 )
 
 var (
-	videos  map[string]*Video
 	cvid    *Video
 	vlock   sync.Mutex
 	waiting = make(chan *User)
@@ -25,50 +20,21 @@ type Video struct {
 	updated time.Time
 }
 
-func init() {
-	go func() {
-		c := make(chan os.Signal)
-		signal.Notify(c, syscall.SIGUSR1)
-
-		for {
-			<-c
-			err := loadVideos()
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			for u := range users {
-				u.listVideos()
-			}
-		}
-	}()
-
-	loadVideos()
-}
-
-func loadVideos() error {
-	vlock.Lock()
-	defer vlock.Unlock()
-
-	videos = make(map[string]*Video)
-	return filepath.Walk(".", func(path string,
-		info os.FileInfo, err error) error {
-		if err == nil && !info.IsDir() {
-			videos[path] = &Video{path: path}
-		}
-		return err
-	})
+func (v *Video) MarshalJSON() ([]byte, error) {
+	return json.Marshal(v.path)
 }
 
 func selectVideo(name string, from *User) error {
 	vlock.Lock()
 	defer vlock.Unlock()
 
-	if v, ok := videos[name]; !ok {
+	var ok bool
+	if cvid, ok = fpVideos[name]; !ok {
 		return errors.New("No such video: " + name)
 	} else {
-		cvid = v
-		send("select", name, from)
+		if ok {
+			send("select", name, from)
+		}
 	}
 
 	return nil

@@ -65,7 +65,7 @@
 		  content: "Loading...";
 	  }
 
-	  aside > ul#list {
+	  aside > #list {
 		  list-style: none;
 		  flex: 1;
 		  padding: 0;
@@ -74,16 +74,37 @@
 		  margin: 0;
 	  }
 
-	  aside > ul#list > li {
-		  padding: 8px;
-		  word-break: break-all;
+	  aside > #list ul {
+		  margin: 0;
+		  padding: 0;
 	  }
-	  aside > ul#list > li:hover {
+	  
+	  aside > #list li {
+		  padding: 0;
+		  word-break: break-all;
+		  list-style: none;
+	  }
+	  aside > #list li > span {
+		  padding: 8px;
+		  display: block;
+	  }
+	  
+	  aside > #list li > span:hover {
 		  background: gainsboro;
 		  cursor: pointer;
 	  }
-	  aside > ul#list > li.selected {
+	  aside > #list li.selected {
 		  font-weight: bold;
+	  }
+	  aside > #list li.dir > span {
+		  font-style: italic;
+	  }
+	  aside > #list li.dir > ul {
+		  display: none;
+	  }
+	  aside > #list li.dir.opened > ul {
+		  display: block;
+		  border-left: 4px solid silver;
 	  }
 
 	  aside > #log {
@@ -129,7 +150,7 @@
 	</main>
 	<aside>
 	  <header id="sync"></header>
-	  <ul id="list"></ul>
+	  <div id="list"></div>
 	  <ul id="log"></ul>		
 	</aside>
   </body>
@@ -147,6 +168,7 @@
 	var uid = -1;
 
 	function send(name, data) {
+		console.log(name, data);
 		socket.send(JSON.stringify({
 			"name": name,
 			"data": data
@@ -162,8 +184,33 @@
 		log.scrollTop = log.scrollHeight - 12;
 	}
 
+	function loadtree(tree) {
+		let ul = document.createElement("ul");
+
+		Object.keys(tree).map((name, idx) => {
+			let li = document.createElement("li");
+			let span = document.createElement("span");
+			span.appendChild(document.createTextNode(name));
+			li.appendChild(span);
+
+			if ((typeof tree[name]) === 'string') {
+				span.onclick = _ => send("select", tree[name]);
+			} else {
+				span.onclick = _ => li.classList.toggle("opened");
+				li.classList.add("dir");
+				
+				var subtree = loadtree(tree[name])
+				if (subtree) li.appendChild(subtree);
+			}
+
+			ul.appendChild(li);
+		})
+		
+		return ul;
+	}
+		
 	function select(path) {
-		video.src = "/data/" + path;
+		console.log(video.src = "/data/" + path);
 		video.load();
 		video.currentTime = 0;
 		header.classList.add("loading");
@@ -181,14 +228,9 @@
 		try {
 			switch (msg.name) {
 			case "list":
-				while(list.firstChild)
-					list.removeChild(list.firstChild);
-				msg.data.map(name => {
-					let li = document.createElement("li");
-					li.appendChild(document.createTextNode(name));
-					li.onclick = _ => send("select", name);
-					list.appendChild(li);
-				});
+				while (list.firstChild)
+					list.firstChild.remove();
+				list.appendChild(loadtree(msg.data));
 				break;
 			case "pause":
 				if (msg.from != uid &&
