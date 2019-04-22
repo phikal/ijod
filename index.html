@@ -263,6 +263,7 @@
 			case "uid": uid = msg.data; break;
 			case "select": select(msg.data); break;
 			case "msg": logmsg(msg.data); break;
+			case "join": logmsg(msg.data + " joined", "silver"); break;
 			case "pos": send("pos", video.currentTime); break;
 			default:
 				logmsg("Recieved unknown message: <code>" +

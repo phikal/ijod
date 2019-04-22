@@ -25,7 +25,7 @@ func (u *User) process(op string, data interface{}) {
 		} else {
 			u.sendStatus(nil)
 		}
-		log.Println(u.id, "joined")
+		send("join", u.id, u)
 	case "pos":
 		if val, ok := data.(float64); ok {
 			pos := time.Duration(float64(time.Second) * val)
