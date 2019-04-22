@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sort"
 	"time"
@@ -62,11 +61,11 @@ func (u *User) leave() {
 
 //
 func (u *User) sendStatus(pos *time.Duration) {
-	if pos != nil {
-		u.send("time", pos.Seconds(), nil)
-	}
 	if cvid != nil {
 		u.send("select", cvid.path, nil)
+	}
+	if pos != nil {
+		u.send("time", pos.Seconds(), nil)
 	}
 	u.send("uid", u.id, nil)
 	u.listVideos()
@@ -109,7 +108,6 @@ func (u *User) setPos(pos time.Duration) {
 		}
 		avg /= time.Duration(len(users))
 
-		fmt.Println(cvid, avg)
 		if cvid != nil {
 			select {
 			case user := <-waiting:
@@ -118,7 +116,6 @@ func (u *User) setPos(pos time.Duration) {
 				log.Println("No status received after a second")
 			}
 		} else {
-			// user := <-waiting
 			select {
 			case user := <-waiting:
 				user.sendStatus(&avg)
