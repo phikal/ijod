@@ -12,12 +12,14 @@ import (
 func main() {
 	var (
 		addr  string
+		pass  string
 		debug bool
 	)
 
 	// configure flag parsing
 	flag.BoolVar(&debug, "debug", false, "turn debugging mode on")
 	flag.StringVar(&addr, "addr", ":8080", "address to listen on")
+	flag.StringVar(&pass, "pass", "", "basic auth password to require")
 	flag.Parse()
 
 	// enable debugging mode, if requested
@@ -49,6 +51,18 @@ func main() {
 		}
 	})
 
+	var handler http.Handler
+	if pass != "" {
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, try, _ := r.BasicAuth()
+			if try != pass {
+				w.Header().Set("WWW-Authenticate", `Basic realm="pass"`)
+				http.Error(w, "Unauthorized.", http.StatusUnauthorized)
+			} else {
+				http.DefaultServeMux.ServeHTTP(w, r)
+			}
+		})
+	}
 	log.Println("Listening on", addr)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	log.Fatal(http.ListenAndServe(addr, handler))
 }
