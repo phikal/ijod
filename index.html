@@ -230,7 +230,9 @@
 			case "list":
 				while (list.firstChild)
 					list.firstChild.remove();
-				list.appendChild(loadtree(msg.data));
+				list.appendChild(loadtree(msg.data)
+								 .childNodes[0]
+								 .childNodes[1]);
 				break;
 			case "pause":
 				if (msg.from != uid &&
