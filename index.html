@@ -102,10 +102,15 @@
 
 	  aside > #log > li {
 		  list-style: none;
+		  border-top: 1px solid gray;
+		  padding-top: 4px;
+		  margin: 4px 0;
 	  }
 
-	  aside > #log > li:hover {
-		  color: gray;
+	  aside > #log > li:first-of-type {
+		  border-top-width: 0;
+		  margin-top: 0;
+		  padding-top: 0;
 	  }
 
 	  aside > header, aside > ul, aside > footer {
@@ -126,7 +131,6 @@
 	<aside>
 	  <header id="sync"></header>
 	  <ul id="list"></ul>
-	  <!-- contenteditable="true" -->
 	  <ul id="log"></ul>		
 	</aside>
   </body>
@@ -144,16 +148,17 @@
 	var uid = -1;
 
 	function send(name, data) {
-		console.log(name, data);
 		socket.send(JSON.stringify({
 			"name": name,
 			"data": data
 		}));
 	}
 
-	function logmsg(msg) {
+	function logmsg(msg, color) {
 		let li = document.createElement("li");
 		li.innerHTML = msg;
+		li.style.color = color;
+		li.title = new Date();
 		log.appendChild(li);
 		log.scrollTop = log.scrollHeight - 12;
 	}
@@ -169,11 +174,11 @@
 				item.classList.add("selected");
 			else  item.classList.remove("selected");
 		}
+		logmsg("Selected " + path, "lightgreen");
 	}
 
 	socket.onmessage = evt => {
 		var msg = JSON.parse(evt.data);
-		console.log("got: ", msg);
 		try {
 			switch (msg.name) {
 			case "list":
@@ -190,7 +195,7 @@
 				if (msg.from != uid &&
 					uid != -1 &&
 					!video.paused) {
-					logmsg("Paused video");
+					logmsg("Paused video", "lightcoral");
 					video.pause();
 				}
 				break;
@@ -198,7 +203,7 @@
 				if (msg.from != uid &&
 					uid != -1 &&
 					video.paused) {
-					logmsg("Continued playback");
+					logmsg("Continued playback", "lightcyan");
 					video.play();
 				}
 				header.classList.remove("loading");
@@ -208,7 +213,7 @@
 					Math.abs(msg.data - video.currentTime) > 0.15) {
 					logmsg(msg.data < video.currentTime ?
 						   "Jumped backwards" :
-						   "Jumped forwards");
+						   "Jumped forwards", "blanchedalmond");
 					video.currentTime = msg.data;
 				}
 				break;

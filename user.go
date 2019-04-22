@@ -28,8 +28,6 @@ func newUser() *User {
 	vlock.Unlock()
 	u.id = uidc
 
-	u.send("msg", "Ijod v1", nil)
-	u.send("msg", "<em>Here be dragons...</em>", nil)
 	return u
 }
 
