@@ -20,10 +20,9 @@ var (
 
 type Video struct {
 	sync.Mutex
-	path     string
-	playing  bool
-	fsyncing bool
-	updated  time.Time
+	path    string
+	playing bool
+	updated time.Time
 }
 
 func init() {
@@ -68,9 +67,6 @@ func selectVideo(name string, from *User) error {
 	if v, ok := videos[name]; !ok {
 		return errors.New("No such video: " + name)
 	} else {
-		if cvid != nil {
-			cvid.fsyncing = false
-		}
 		cvid = v
 		send("select", name, from)
 	}
@@ -83,7 +79,7 @@ func selectVideo(name string, from *User) error {
 //
 // a "pause"-signal is sent to all members of this room
 func (v *Video) pause(from *User) {
-	if v == nil || !v.playing || v.fsyncing {
+	if v == nil || !v.playing {
 		return
 	}
 
@@ -96,7 +92,7 @@ func (v *Video) pause(from *User) {
 //
 // a "play"-signal is sent to all members of this room
 func (v *Video) play(from *User) {
-	if v == nil || v.playing || v.fsyncing {
+	if v == nil || v.playing {
 		return
 	}
 
@@ -106,7 +102,7 @@ func (v *Video) play(from *User) {
 
 // jumpTo sets a absolute position in the video
 func (v *Video) jumpTo(pos float64, from *User) {
-	if v == nil || v.fsyncing {
+	if v == nil {
 		return
 	}
 
@@ -135,7 +131,6 @@ func (v *Video) startp() {
 		for u := range users {
 			u.ready = false
 		}
-		v.fsyncing = false
 		v.play(nil)
 	}
 }

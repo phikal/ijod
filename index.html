@@ -57,11 +57,8 @@
 	  aside > header { background: turquoise; }
 	  aside > header:after { content: "Select a Video~"; }
 
-	  aside > header:hover { background: coral; cursor: pointer; }
-	  aside > header:hover:after { content: "Force Sync!"; }
-
 	  aside > header.loading {
-		  background: turquoise;
+		  background: tomato;
 		  cursor: default;
 	  }
 	  aside > header.loading:after {
@@ -215,10 +212,7 @@
 					video.currentTime = msg.data;
 				}
 				break;
-			case "fsync":
-				// incomplete
-				break;
-			case "uid": uid = msg.data; break
+			case "uid": uid = msg.data; break;
 			case "select": select(msg.data); break;
 			case "msg": logmsg(msg.data); break;
 			case "pos": send("pos", video.currentTime); break;
@@ -237,6 +231,5 @@
 	video.onplay = _ => send("play", video.currentTime);
 	video.onseeked = video.onpause = _ => send("pause", video.currentTime);
 	video.oncanplay = _ => send("ready");
-	header.onclick = _ => send("fsync", video.currentTime);
   </script>
 </html>

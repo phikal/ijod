@@ -11,11 +11,6 @@ type Message map[string]interface{}
 // OP.
 func (u *User) process(op string, data interface{}) {
 	switch op {
-	case "fsync":
-		if cvid != nil {
-			cvid.fsyncing = true
-			send("fsync", nil, u)
-		}
 	case "ready":
 		u.ready = true
 		cvid.startp()
