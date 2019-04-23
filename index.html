@@ -93,11 +93,13 @@
 		  background: gainsboro;
 		  cursor: pointer;
 	  }
-	  aside > #list li.selected {
+	  aside > #list li.dir > span::before {
+		  content: "↳ ";
 		  font-weight: bold;
+		  color: orangered;
 	  }
-	  aside > #list li.dir > span {
-		  font-style: italic;
+	  aside > #list li.dir.opened > span::before {
+		  content: "⬎ ";
 	  }
 	  aside > #list li.dir > ul {
 		  display: none;
@@ -214,12 +216,6 @@
 		video.load();
 		video.currentTime = 0;
 		header.classList.add("loading");
-		for (var i = 0; i < list.children.length; i++) {
-			var item = list.children[i];
-			if (item.innerText == path)
-				item.classList.add("selected");
-			else  item.classList.remove("selected");
-		}
 		logmsg("Selected " + path, "lightgreen");
 	}
 
