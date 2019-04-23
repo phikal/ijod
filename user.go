@@ -106,7 +106,7 @@ func (u *User) setPos(pos time.Duration) {
 		select {
 		case user := <-waiting:
 			user.sendStatus(&avg)
-		case <-time.NewTimer(time.Second).C:
+		case <-time.NewTimer(time.Second * 5).C:
 			log.Println("No status received after a second")
 		}
 	}
