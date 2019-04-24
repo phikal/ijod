@@ -23,6 +23,7 @@ type Room struct {
 	vid   *Video
 	users map[*User]bool
 	wait  chan *User
+	mon   chan<- *Message
 }
 
 func init() {
@@ -68,5 +69,13 @@ func newRoom() string {
 	}
 
 	log.Println("Created room", room.name)
+	go room.monitor()
 	return "/room?id=" + room.name
+}
+
+// send a message to all users
+func (r *Room) send(name string, data interface{}, from *User) {
+	for u := range r.users {
+		u.send(name, data, from)
+	}
 }

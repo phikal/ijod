@@ -5,7 +5,11 @@ import (
 	"time"
 )
 
-type Message map[string]interface{}
+type Message struct {
+	Name string      `json:"name"`
+	From uint32      `json:"from,omitempty"`
+	Data interface{} `json:"data"`
+}
 
 // Process selects an operation to execute, depending on the value of
 // OP.
@@ -41,6 +45,8 @@ func (u *User) process(op string, data interface{}) {
 	case "play":
 		u.room.play(u)
 	case "pause":
+		u.room.pause(u)
+	case "time":
 		if pos, ok := data.(float64); ok {
 			u.room.jumpTo(pos, u)
 		}

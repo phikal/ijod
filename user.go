@@ -10,7 +10,7 @@ var counter uint32
 
 type User struct {
 	id    uint32
-	msgs  chan Message
+	msgs  chan *Message
 	ready bool
 	room  *Room
 	pos   *time.Duration
@@ -19,7 +19,7 @@ type User struct {
 // newUser adds a new user to room
 func newUser(room *Room) *User {
 	u := &User{
-		msgs: make(chan Message, 1<<4),
+		msgs: make(chan *Message, 1<<4),
 		room: room,
 	}
 
@@ -31,23 +31,16 @@ func newUser(room *Room) *User {
 	return u
 }
 
-// send a message to all users
-func (r *Room) send(name string, data interface{}, from *User) {
-	for u := range r.users {
-		u.send(name, data, from)
-	}
-}
-
 // send a message to a specific user
 func (u *User) send(name string, data interface{}, from *User) {
 	msg := Message{
-		"name": name,
-		"data": data,
+		Name: name,
+		Data: data,
 	}
 	if from != nil {
-		msg["from"] = from.id
+		msg.From = from.id
 	}
-	u.msgs <- msg
+	u.msgs <- &msg
 }
 
 // leave cleans up after a user has closed his connection
@@ -55,6 +48,7 @@ func (u *User) leave() {
 	u.room.Lock()
 	delete(u.room.users, u)
 	u.room.Unlock()
+	u.room.mon <- &Message{Name: "leave"}
 }
 
 // sendStatus is a meta function to send all necessary information about
@@ -73,10 +67,7 @@ func (u *User) sendStatus(pos *time.Duration) {
 // listVideos sends a list of all available videos back to the client
 // that requested it
 func (u *User) listVideos() {
-	u.msgs <- Message{
-		"name": "list",
-		"data": videos,
-	}
+	u.send("list", videos, nil)
 }
 
 // setPos is used by the client to inform the server of the current

@@ -43,18 +43,14 @@ func socket(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	var msg Message
 	for {
+		var msg Message
 		if err = conn.ReadJSON(&msg); err != nil {
 			log.Println(err)
 			break
 		} else {
-			log.Println(msg)
-			name, ok1 := msg["name"]
-			op, ok2 := name.(string)
-			if ok1 && ok2 {
-				user.process(op, msg["data"])
-			}
+			user.process(msg.Name, msg.Data)
+			room.mon <- &msg
 		}
 	}
 }
