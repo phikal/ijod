@@ -7,10 +7,12 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"sync"
 	"syscall"
 )
 
 var (
+	vlock    sync.Mutex
 	fpVideos = make(map[string]*Video)
 
 	videos map[string]interface{}
@@ -28,8 +30,10 @@ func init() {
 				log.Println(err)
 			}
 
-			for u := range users {
-				u.listVideos()
+			for _, r := range rooms {
+				for u := range r.users {
+					u.listVideos()
+				}
 			}
 			<-c
 		}

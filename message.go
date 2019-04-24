@@ -13,19 +13,19 @@ func (u *User) process(op string, data interface{}) {
 	switch op {
 	case "ready":
 		u.ready = true
-		cvid.startp()
+		u.room.startp()
 	case "join":
-		for w := range users {
+		for w := range u.room.users {
 			if u != w {
 				w.send("pos", nil, u)
 			}
 		}
-		if len(users) > 1 {
-			waiting <- u
+		if len(u.room.users) > 1 {
+			u.room.wait <- u
 		} else {
 			u.sendStatus(nil)
 		}
-		send("join", u.id, u)
+		u.room.send("join", u.id, u)
 	case "pos":
 		if val, ok := data.(float64); ok {
 			pos := time.Duration(float64(time.Second) * val)
@@ -33,16 +33,16 @@ func (u *User) process(op string, data interface{}) {
 		}
 	case "select":
 		if name, ok := data.(string); ok {
-			err := selectVideo(name, u)
+			err := u.room.selectVideo(name, u)
 			if err != nil {
 				log.Println(err)
 			}
 		}
 	case "play":
-		cvid.play(u)
+		u.room.play(u)
 	case "pause":
 		if pos, ok := data.(float64); ok {
-			cvid.jumpTo(pos, u)
+			u.room.jumpTo(pos, u)
 		}
 	}
 }

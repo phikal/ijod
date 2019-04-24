@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,28 +31,26 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	// prepare index.html
-	index, err := Asset("index.html")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	// initialize and start HTTP server
+	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir("."))
-	http.Handle("/data/", http.StripPrefix("/data/", fs))
-	http.HandleFunc("/socket", socket)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
+	mux.Handle("/data/", http.StripPrefix("/data/", fs))
+	mux.HandleFunc("/socket", socket)
+	mux.HandleFunc("/room", room)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/new":
+			http.Redirect(w, r, newRoom(), http.StatusFound)
+		case "/":
+			w.Header().Add("Content-Type", "text/html")
+			fmt.Fprint(w, `<pre>IJOD
+<a href="/new">new</a>`)
+		default:
 			http.Error(w, "no such site", http.StatusNotImplemented)
-			return
-		}
-
-		if _, err := w.Write(index); err != nil {
-			log.Println(err)
 		}
 	})
 
-	var handler http.Handler
+	var handler http.Handler = mux
 	if pass != "" {
 		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			_, try, _ := r.BasicAuth()
@@ -59,7 +58,7 @@ func main() {
 				w.Header().Set("WWW-Authenticate", `Basic realm="pass"`)
 				http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			} else {
-				http.DefaultServeMux.ServeHTTP(w, r)
+				mux.ServeHTTP(w, r)
 			}
 		})
 	}

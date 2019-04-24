@@ -163,8 +163,10 @@
 	const header = document.getElementById("sync");
 	const log = document.getElementById("log");
 
+	const room = {{ . }};
 	const socket = new WebSocket(
-		"ws://" + location.hostname + ":" + location.port + "/socket"
+		"ws://" + location.hostname + ":" + location.port +
+			"/socket?id=" + room
 	);
 
 	var uid = -1;

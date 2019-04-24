@@ -22,12 +22,20 @@ func socket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := newUser()
+	id := r.URL.Query().Get("id")
+	room, ok := rooms[id]
+	if !ok {
+		log.Println("no such room", id)
+		http.Error(w, "no such room", http.StatusBadRequest)
+		return
+	}
+
+	user := newUser(room)
 	defer user.leave()
 
 	go func() {
 		for msg := range user.msgs {
-			// log.Printf("%d sending %v", user.id, msg)
+			log.Println(msg)
 			err := conn.WriteJSON(msg)
 			if err != nil {
 				log.Println(err)
@@ -41,7 +49,7 @@ func socket(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			break
 		} else {
-			// log.Printf("%d reciving %v", user.id, msg)
+			log.Println(msg)
 			name, ok1 := msg["name"]
 			op, ok2 := name.(string)
 			if ok1 && ok2 {
