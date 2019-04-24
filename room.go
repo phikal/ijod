@@ -26,7 +26,7 @@ type Room struct {
 }
 
 func init() {
-	index, err := Asset("index.html")
+	index, err := Asset("room.html")
 	if err != nil {
 		log.Fatalln(err)
 	}
