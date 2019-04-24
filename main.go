@@ -1,10 +1,9 @@
-//go:generate go-bindata -o static.go index.html
+//go:generate go-bindata -o static.go index.html room.html
 
 package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -31,7 +30,13 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	// initialize and start HTTP server
+	// attempt to find index asset
+	index, err := Asset("index.html")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// initialise and start HTTP server
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir("."))
 	mux.Handle("/data/", http.StripPrefix("/data/", fs))
@@ -43,8 +48,7 @@ func main() {
 			http.Redirect(w, r, newRoom(), http.StatusFound)
 		case "/":
 			w.Header().Add("Content-Type", "text/html")
-			fmt.Fprint(w, `<pre>IJOD
-<a href="/new">new</a>`)
+			w.Write(index)
 		default:
 			http.Error(w, "no such site", http.StatusNotImplemented)
 		}
