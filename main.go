@@ -12,14 +12,14 @@ import (
 func main() {
 	var (
 		addr  string
-		pass  string
+		auth  string
 		debug bool
 	)
 
 	// configure flag parsing
 	flag.BoolVar(&debug, "debug", false, "turn debugging mode on")
 	flag.StringVar(&addr, "addr", ":8080", "address to listen on")
-	flag.StringVar(&pass, "pass", "", "basic auth password to require")
+	flag.StringVar(&auth, "auth", "", "basic auth username and password (separated with \":\")")
 	flag.Parse()
 
 	// enable debugging mode, if requested
@@ -55,11 +55,11 @@ func main() {
 	})
 
 	var handler http.Handler = mux
-	if pass != "" {
+	if auth != "" {
 		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			_, try, _ := r.BasicAuth()
-			if try != pass {
-				w.Header().Set("WWW-Authenticate", `Basic realm="pass"`)
+			try_user, try_pass, _ := r.BasicAuth()
+			if try_user+":"+try_pass != auth {
+				w.Header().Set("WWW-Authenticate", `Basic realm="auth"`)
 				http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			} else {
 				mux.ServeHTTP(w, r)
