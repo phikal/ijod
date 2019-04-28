@@ -6,8 +6,9 @@ import (
 )
 
 type Message struct {
+	Op   string      `json:"op"`
 	Name string      `json:"name"`
-	From uint32      `json:"from,omitempty"`
+	From int         `json:"from,omitempty"`
 	Data interface{} `json:"data"`
 }
 

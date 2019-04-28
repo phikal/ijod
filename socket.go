@@ -49,7 +49,7 @@ func socket(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			break
 		} else {
-			user.process(msg.Name, msg.Data)
+			user.process(msg.Op, msg.Data)
 			room.mon <- &msg
 		}
 	}

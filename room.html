@@ -1,6 +1,6 @@
 <html>
   <head>
-	<title>Ijod</title>
+	<title>Ijod: {{ . }}</title>
 	<meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="referrer" content="none" />
@@ -176,11 +176,11 @@
 	var uid = -1;
 	var tpad = 1/3;
 
-	function send(name, data) {
-		console.log(name, data);
+	function send(op, data) {
 		socket.send(JSON.stringify({
-			"name": name,
-			"data": data
+			"op": op,
+			"data": data,
+			"from": uid
 		}));
 	}
 
@@ -230,7 +230,7 @@
 	socket.onmessage = evt => {
 		var msg = JSON.parse(evt.data);
 		try {
-			switch (msg.name) {
+			switch (msg.op) {
 			case "list":
 				while (list.firstChild)
 					list.firstChild.remove();
@@ -268,11 +268,10 @@
 			case "uid": uid = msg.data; break;
 			case "select": select(msg.data); break;
 			case "msg": logmsg(msg.data); break;
-			case "join": logmsg(msg.data + " joined", "silver"); break;
+			case "join": logmsg(msg.name + " joined", "silver"); break;
 			case "pos": send("pos", video.currentTime); break;
 			default:
-				logmsg("Recieved unknown message: <code>" +
-					   msg + "</code>");
+				logmsg("Recieved unknown message: <code>" + msg + "</code>");
 			}
 		} catch (e) {
 			console.log(e);

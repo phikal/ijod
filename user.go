@@ -2,14 +2,14 @@ package main
 
 import (
 	"log"
-	"sync/atomic"
 	"time"
 )
 
-var counter uint32
+var counter int
 
 type User struct {
-	id    uint32
+	id    int
+	name  string
 	msgs  chan *Message
 	ready bool
 	room  *Room
@@ -18,27 +18,30 @@ type User struct {
 
 // newUser adds a new user to room
 func newUser(room *Room) *User {
+	room.Lock()
+	defer room.Unlock()
 	u := &User{
 		msgs: make(chan *Message, 1<<4),
 		room: room,
+		name: words[counter%len(words)],
 	}
 
-	room.Lock()
 	room.users[u] = true
-	room.Unlock()
-	u.id = atomic.AddUint32(&counter, 1)
+	u.id = counter
+	counter += 1
 
 	return u
 }
 
 // send a message to a specific user
-func (u *User) send(name string, data interface{}, from *User) {
+func (u *User) send(op string, data interface{}, from *User) {
 	msg := Message{
-		Name: name,
+		Op:   op,
 		Data: data,
 	}
 	if from != nil {
 		msg.From = from.id
+		msg.Name = from.name
 	}
 	u.msgs <- &msg
 }
@@ -48,7 +51,7 @@ func (u *User) leave() {
 	u.room.Lock()
 	delete(u.room.users, u)
 	u.room.Unlock()
-	u.room.mon <- &Message{Name: "leave"}
+	u.room.mon <- &Message{Op: "leave"}
 }
 
 // sendStatus is a meta function to send all necessary information about

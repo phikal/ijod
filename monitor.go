@@ -10,7 +10,7 @@ func (r *Room) monitor() {
 	r.mon = mon
 
 	for msg := range mon {
-		switch msg.Name {
+		switch msg.Op {
 		case "leave":
 			go func() {
 				time.Sleep(5 * time.Second)

@@ -10,30 +10,32 @@ import (
 )
 
 func main() {
-	var (
-		addr  string
-		auth  string
-		debug bool
-	)
-
-	// configure flag parsing
-	flag.BoolVar(&debug, "debug", false, "turn debugging mode on")
-	flag.StringVar(&addr, "addr", ":8080", "address to listen on")
-	flag.StringVar(&auth, "auth", "", "basic auth username and password (separated with \":\")")
+	// parse command line options
+	addr := flag.String("addr", ":8080", "address to listen on")
+	auth := flag.String("auth", "", "basic auth username and password (separated with \":\")")
+	names := flag.String("words", "/usr/share/dict/words", "word-file to user for names")
+	debug := flag.Bool("debug", false, "turn debugging mode on")
 	flag.Parse()
-
-	// enable debugging mode, if requested
-	if debug {
-		log.SetFlags(log.LUTC | log.Lshortfile | log.Ltime)
-	} else {
-		log.SetFlags(0)
-		log.SetOutput(ioutil.Discard)
-	}
 
 	// attempt to find index asset
 	index, err := Asset("index.html")
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	// load file with words for words in it
+	err = loadNames(*names)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Printf("Read in %d names\n", len(words))
+
+	// enable debugging mode, if requested
+	if *debug {
+		log.SetFlags(log.LUTC | log.Lshortfile | log.Ltime)
+	} else {
+		log.SetFlags(0)
+		log.SetOutput(ioutil.Discard)
 	}
 
 	// initialise and start HTTP server
@@ -55,10 +57,10 @@ func main() {
 	})
 
 	var handler http.Handler = mux
-	if auth != "" {
+	if *auth != "" {
 		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			try_user, try_pass, _ := r.BasicAuth()
-			if try_user+":"+try_pass != auth {
+			if try_user+":"+try_pass != *auth {
 				w.Header().Set("WWW-Authenticate", `Basic realm="auth"`)
 				http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			} else {
@@ -66,6 +68,6 @@ func main() {
 			}
 		})
 	}
-	log.Println("Listening on", addr)
-	log.Fatal(http.ListenAndServe(addr, handler))
+	log.Println("Listening on", *addr)
+	log.Fatal(http.ListenAndServe(*addr, handler))
 }
