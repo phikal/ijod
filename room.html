@@ -19,6 +19,7 @@
 		  font-family: Consolas, Hack, Monaco, monospace, monospace;
 		  font-size: 12px;
 		  min-width: 512px;
+		  overflow: hidden;
 	  }
 
 	  main, aside {
@@ -55,14 +56,17 @@
 	  }
 
 	  aside > header { background: turquoise; }
-	  aside > header:after { content: "Select a Video~"; }
+	  aside > header::before {
+		  font-weight: bold;
+		  content: "Watching ";
+	  }
 
 	  aside > header.loading {
 		  background: tomato;
 		  cursor: default;
 	  }
-	  aside > header.loading:after {
-		  content: "Loading...";
+	  aside > header.loading::before {
+		  content: "Loading ";
 	  }
 
 	  aside > #list {
@@ -151,7 +155,7 @@
 	  </video>
 	</main>
 	<aside>
-	  <header id="sync"></header>
+	  <header id="status">Nothing</header>
 	  <div id="list"></div>
 	  <ul id="log"></ul>		
 	</aside>
@@ -160,7 +164,7 @@
 	"use strict";
 	const video = document.getElementById("video");
 	const list = document.getElementById("list");
-	const header = document.getElementById("sync");
+	const header = document.getElementById("status");
 	const log = document.getElementById("log");
 
 	const room = {{ . }};
@@ -219,6 +223,7 @@
 		video.load();
 		video.currentTime = 0;
 		header.classList.add("loading");
+		header.innerText = path;
 		logmsg("Selected " + path, "lightgreen");
 	}
 
