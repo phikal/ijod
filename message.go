@@ -7,7 +7,7 @@ import (
 
 type Message struct {
 	Op   string      `json:"op"`
-	Name string      `json:"name"`
+	Name string      `json:"name,omitempty"`
 	From int         `json:"from,omitempty"`
 	Data interface{} `json:"data"`
 }

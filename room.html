@@ -53,6 +53,7 @@
 		  margin: 0;
 		  padding: 12px;
 		  border-bottom: 1px solid gray;
+		  overflow-wrap: break-word;
 	  }
 
 	  aside > header { background: turquoise; }
@@ -218,13 +219,13 @@
 		return ul;
 	}
 		
-	function select(path) {
-		console.log(video.src = "/data/" + path);
+	function select(msg) {
 		video.load();
 		video.currentTime = 0;
 		header.classList.add("loading");
-		header.innerText = path;
-		logmsg("Selected " + path, "lightgreen");
+		header.innerText = msg.data;
+		logmsg(msg.name + " selected " + msg.data,
+			   "lightgreen");
 	}
 
 	socket.onmessage = evt => {
@@ -242,33 +243,39 @@
 				if (msg.from != uid &&
 					uid != -1 &&
 					!video.paused) {
-					logmsg("Paused video", "lightcoral");
 					video.pause();
 				}
+				if (msg.name)
+					logmsg(msg.name + " paused video", "lightcoral");
 				break;
 			case "play":
 				if (msg.from != uid &&
 					uid != -1 &&
 					video.paused) {
-					logmsg("Continued playback", "lightcyan");
 					video.play();
 				}
+				if (msg.name)
+					logmsg(msg.name + " continued playback", "lightcyan");
 				header.classList.remove("loading");
 				break;
 			case "time":
 				if (msg.data &&
 					Math.abs(msg.data - video.currentTime) > tpad) {
 					logmsg(msg.data < video.currentTime ?
-						   "Jumped backwards" :
-						   "Jumped forwards", "blanchedalmond");
+						   msg.name + " jumped backwards" :
+						   msg.name + " jumped forwards",
+						   "blanchedalmond");
 					video.currentTime = msg.data;
 				}
 				break;
 			case "tpad": tpad = msg.data; break;
 			case "uid": uid = msg.data; break;
-			case "select": select(msg.data); break;
+			case "select": select(msg); break;
 			case "msg": logmsg(msg.data); break;
-			case "join": logmsg(msg.name + " joined", "silver"); break;
+			case "leave": logmsg(msg.name + " has left", "silver"); break;
+			case "join": logmsg(msg.name + " joined" +
+								(msg.data == uid ? " (this is you)" : ""),
+								"silver"); break;
 			case "pos": send("pos", video.currentTime); break;
 			default:
 				logmsg("Recieved unknown message: <code>" + msg + "</code>");

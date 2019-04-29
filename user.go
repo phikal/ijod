@@ -21,14 +21,15 @@ func newUser(room *Room) *User {
 	room.Lock()
 	defer room.Unlock()
 	u := &User{
+		id:   counter,
 		msgs: make(chan *Message, 1<<4),
 		room: room,
 		name: words[counter%len(words)],
 	}
 
 	room.users[u] = true
-	u.id = counter
-	counter += 1
+	u.send("uid", u.id, u)
+	counter++
 
 	return u
 }
@@ -52,6 +53,7 @@ func (u *User) leave() {
 	delete(u.room.users, u)
 	u.room.Unlock()
 	u.room.mon <- &Message{Op: "leave"}
+	u.room.send("leave", u.name, u)
 }
 
 // sendStatus is a meta function to send all necessary information about
@@ -63,7 +65,6 @@ func (u *User) sendStatus(pos *time.Duration) {
 	if pos != nil {
 		u.send("time", pos.Seconds(), nil)
 	}
-	u.send("uid", u.id, nil)
 	u.listVideos()
 }
 
