@@ -286,8 +286,7 @@
 	}
 
 	socket.onopen = _ => send("join");
-	socket.onerror = logmsg;
-	window.onclose = _ => logmsg("<em>connection aborted!</em>");
+	socket.onerror = msg => logmsg("ERROR: " + msg.message, "red");
 	video.onplay = _ => send("play", video.currentTime);
 	video.onseeked = video.onpause = _ => send("time", video.currentTime);
 	video.oncanplay = _ => send("ready");
