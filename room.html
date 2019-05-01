@@ -220,12 +220,14 @@
 	}
 		
 	function select(msg) {
+		video.src = "/data/" + msg.data;
 		video.load();
 		video.currentTime = 0;
 		header.classList.add("loading");
 		header.innerText = msg.data;
-		logmsg(msg.name + " selected " + msg.data,
-			   "lightgreen");
+		if (msg.name)
+			logmsg(msg.name + " selected " + msg.data,
+				   "lightgreen");
 	}
 
 	socket.onmessage = evt => {
