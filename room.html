@@ -289,6 +289,8 @@
 								(msg.data == uid ? " (this is you)" : ""),
 								"silver"); break;
 			case "pos": send("pos", video.currentTime); break;
+			case "who": logmsg("In this room: " + msg.data.join(", "),
+							   "peachpuff"); break;
 			default:
 				logmsg("Recieved unknown message: <code>" + msg + "</code>");
 			}

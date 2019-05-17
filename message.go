@@ -26,6 +26,13 @@ func (u *User) process(op string, data interface{}) {
 			}
 		}
 		if len(u.room.users) > 1 {
+			var users []*User
+			for v := range u.room.users {
+				if u != v {
+					users = append(users, v)
+				}
+			}
+			u.send("who", users, u)
 			u.room.wait <- u
 		} else {
 			u.sendStatus(nil)

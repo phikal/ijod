@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 )
@@ -14,6 +15,10 @@ type User struct {
 	ready bool
 	room  *Room
 	pos   *time.Duration
+}
+
+func (u *User) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.name)
 }
 
 // newUser adds a new user to room
