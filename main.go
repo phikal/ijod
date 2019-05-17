@@ -29,13 +29,6 @@ read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
 		}
 	}
 
-	// load file with words for words in it
-	err = loadNames(*names)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Printf("Read in %d names\n", len(words))
-
 	// enable debugging mode, if requested
 	if *debug {
 		log.SetFlags(log.LUTC | log.Lshortfile | log.Ltime)
@@ -43,6 +36,13 @@ read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
 		log.SetFlags(0)
 		log.SetOutput(ioutil.Discard)
 	}
+
+	// load file with words for words in it
+	err = loadNames(*names)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Printf("Read in %d names\n", len(words))
 
 	// initialise and start HTTP server
 	mux := http.NewServeMux()
