@@ -24,6 +24,7 @@ type Room struct {
 	users map[*User]bool
 	wait  chan *User
 	mon   chan<- *Message
+	close sync.Once
 }
 
 func init() {

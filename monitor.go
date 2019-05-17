@@ -18,8 +18,10 @@ func (r *Room) monitor() {
 					rlock.Lock()
 					delete(rooms, r.name)
 					rlock.Unlock()
+					r.close.Do(func() {
+						close(mon)
+					})
 					log.Println("closed room", r.name)
-					close(mon)
 				}
 			}()
 		}
