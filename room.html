@@ -141,6 +141,16 @@
 		  padding-top: 0;
 	  }
 
+	  @media (max-width: 700px) {
+		  html, body { overflow: initial; width: unset; }
+		  html, body, main { min-width: unset; }
+		  main, video, aside { height: unset; min-height: 50vh; }
+		  main, aside { width: 100%; position: unset; }
+		  aside { background-color: unset; }
+		  aside > #list { overflow-y: initial; }
+		  aside > #log { display: table; height: 12em; }
+	  }
+
 	  * {
 		  -webkit-user-select: none; /* Safari */
 		  -moz-user-select: none; /* Firefox */
