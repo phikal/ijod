@@ -1,4 +1,4 @@
-//go:generate go-bindata -o static.go index.html room.html
+//go:generate go-bindata -o static.go room.html
 
 package main
 
@@ -14,13 +14,19 @@ func main() {
 	addr := flag.String("addr", ":8080", "address to listen on")
 	auth := flag.String("auth", "", "basic auth username and password (separated with \":\")")
 	names := flag.String("words", "/usr/share/dict/words", "word-file to user for names")
+	indexFile := flag.String("index", "", "file to serve as an index page")
 	debug := flag.Bool("debug", false, "turn debugging mode on")
 	flag.Parse()
 
 	// attempt to find index asset
-	index, err := Asset("index.html")
-	if err != nil {
-		log.Fatalln(err)
+	var err error
+	index := []byte(`<pre><strong>IJOD:</strong> <a href="/new">new room</a>
+read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
+	if *indexFile != "" {
+		index, err = ioutil.ReadFile(*indexFile)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// load file with words for words in it
@@ -44,21 +50,17 @@ func main() {
 	mux.Handle("/data/", http.StripPrefix("/data/", fs))
 	mux.HandleFunc("/socket", socket)
 	mux.HandleFunc("/room", room)
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/new":
-			http.Redirect(w, r, newRoom(), http.StatusFound)
-		case "/":
-			w.Header().Add("Content-Type", "text/html")
-			w.Write(index)
-		default:
-			http.Error(w, "no such site", http.StatusNotImplemented)
-		}
-	})
+	mux.Handle("/new", http.RedirectHandler(newRoom(), http.StatusFound))
 
-	var handler http.Handler = mux
+	var handler http.Handler
 	if *auth != "" {
 		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				w.Header().Add("Content-Type", "text/html")
+				w.Write(index)
+				return
+			}
+
 			try_user, try_pass, _ := r.BasicAuth()
 			if try_user+":"+try_pass != *auth {
 				w.Header().Set("WWW-Authenticate", `Basic realm="auth"`)
@@ -66,6 +68,16 @@ func main() {
 			} else {
 				mux.ServeHTTP(w, r)
 			}
+		})
+	} else {
+		handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				w.Header().Add("Content-Type", "text/html")
+				w.Write(index)
+				return
+			}
+
+			mux.ServeHTTP(w, r)
 		})
 	}
 	log.Println("Listening on", *addr)
