@@ -45,18 +45,7 @@ func room(w http.ResponseWriter, r *http.Request) {
 <title>Ijod?</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-<meta name="referrer" content="none" />
-<style>
-  pre {
-	  margin: 5% auto;
-	  display: table;
-	  border: 1px solid black;
-	  padding: 16px;
-  }
-</style>
-<pre>Oops, no such room. Maybe it has been deserted?
-
-If you want to create a new one, <a href="/">go home</a>.`)
+<pre>This room has been destroyed. Create a <a href="/">new one</a>.`)
 		return
 	}
 

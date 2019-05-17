@@ -20,7 +20,12 @@ func main() {
 
 	// attempt to find index asset
 	var err error
-	index := []byte(`<pre><strong>IJOD:</strong> <a href="/new">new room</a>
+	index := []byte(`<!DOCTYPE html>
+<title>Ijod!</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+<pre><strong>IJOD:</strong> <a href="/new">new room</a>
+
 read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
 	if *indexFile != "" {
 		index, err = ioutil.ReadFile(*indexFile)
