@@ -50,7 +50,9 @@ read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
 	mux.Handle("/data/", http.StripPrefix("/data/", fs))
 	mux.HandleFunc("/socket", socket)
 	mux.HandleFunc("/room", room)
-	mux.Handle("/new", http.RedirectHandler(newRoom(), http.StatusFound))
+	mux.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, newRoom(), http.StatusFound)
+	})
 
 	var handler http.Handler
 	if *auth != "" {
