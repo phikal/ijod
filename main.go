@@ -68,8 +68,8 @@ read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
 				return
 			}
 
-			try_user, try_pass, _ := r.BasicAuth()
-			if try_user+":"+try_pass != *auth {
+			tryUser, tryPass, _ := r.BasicAuth()
+			if tryUser+":"+tryPass != *auth {
 				w.Header().Set("WWW-Authenticate", `Basic realm="auth"`)
 				http.Error(w, "Unauthorized.", http.StatusUnauthorized)
 			} else {

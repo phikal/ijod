@@ -8,6 +8,8 @@ import (
 
 var counter int
 
+// User stores all information related to a user in a room and it's
+// websocket connection
 type User struct {
 	id    int
 	name  string
@@ -17,6 +19,8 @@ type User struct {
 	pos   *time.Duration
 }
 
+// MarshalJSON transforms a User into a JSON object, by turning it into
+// it's name-value as a string
 func (u *User) MarshalJSON() ([]byte, error) {
 	return json.Marshal(u.name)
 }

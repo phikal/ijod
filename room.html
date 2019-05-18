@@ -76,7 +76,6 @@
 		  padding: 0;
 		  margin: 0;
 		  overflow-y: auto;
-		  margin: 0;
 	  }
 
 	  aside > #list ul {
@@ -185,7 +184,7 @@
 	);
 
 	var uid = -1;
-	var tpad = 1/3;
+	var tpad = 0.75;
 
 	function send(op, data) {
 		socket.send(JSON.stringify({

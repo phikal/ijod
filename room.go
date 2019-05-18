@@ -11,12 +11,13 @@ import (
 )
 
 var (
-	T *template.Template
+	tmpl *template.Template
 
 	rooms = make(map[string]*Room)
 	rlock sync.Mutex
 )
 
+// Room represents a collection of users and a selected video.
 type Room struct {
 	sync.Mutex
 	name  string
@@ -32,7 +33,7 @@ func init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	T = template.Must(template.New("room").Parse(string(index)))
+	tmpl = template.Must(template.New("room").Parse(string(index)))
 
 	rand.Seed(time.Now().Unix())
 }
@@ -50,7 +51,7 @@ func room(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := T.Execute(w, room.name)
+	err := tmpl.Execute(w, room.name)
 	if err != nil {
 		log.Println(err)
 	}

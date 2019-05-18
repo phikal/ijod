@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Video stores the information about one video in one room
 type Video struct {
 	sync.Mutex
 	path    string
@@ -14,6 +15,8 @@ type Video struct {
 	updated time.Time
 }
 
+// MarshalJSON transforms a Video into a JSON object, by turning it into
+// it's path-value as a string
 func (v *Video) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.path)
 }
@@ -25,10 +28,8 @@ func (r *Room) selectVideo(name string, from *User) error {
 	var ok bool
 	if r.vid, ok = fpVideos[name]; !ok {
 		return errors.New("No such video: " + name)
-	} else {
-		if ok {
-			r.send("select", name, from)
-		}
+	} else if ok {
+		r.send("select", name, from)
 	}
 
 	return nil
@@ -69,12 +70,12 @@ func (r *Room) jumpTo(pos float64, from *User) {
 	r.vid.Lock()
 	defer r.vid.Unlock()
 
-	if time.Since(r.vid.updated) < time.Millisecond*10 {
+	if time.Since(r.vid.updated) < time.Millisecond*500 {
 		return
 	}
 
-	r.pause(from)
 	r.vid.updated = time.Now()
+	r.pause(from)
 	r.send("time", pos, from)
 }
 
