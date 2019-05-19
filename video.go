@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"sync"
 	"time"
@@ -15,18 +14,12 @@ type Video struct {
 	updated time.Time
 }
 
-// MarshalJSON transforms a Video into a JSON object, by turning it into
-// it's path-value as a string
-func (v *Video) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.path)
-}
-
 func (r *Room) selectVideo(name string, from *User) error {
 	r.Lock()
 	defer r.Unlock()
 
 	var ok bool
-	if r.vid, ok = fpVideos[name]; !ok {
+	if r.vid, ok = r.vids[name]; !ok {
 		return errors.New("No such video: " + name)
 	} else if ok {
 		r.send("select", name, from)

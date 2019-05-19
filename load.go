@@ -12,9 +12,7 @@ import (
 )
 
 var (
-	vlock    sync.Mutex
-	fpVideos = make(map[string]*Video)
-
+	vlock  sync.Mutex
 	videos map[string]interface{}
 	dirs   map[string]map[string]interface{}
 )
@@ -31,6 +29,7 @@ func init() {
 			}
 
 			for _, r := range rooms {
+				r.refreshVideos()
 				for u := range r.users {
 					u.listVideos()
 				}
@@ -49,8 +48,7 @@ func walkDir(p string, info os.FileInfo, err error) error {
 	if info.IsDir() {
 		data = make(map[string]interface{})
 	} else {
-		fpVideos[p] = &Video{path: p}
-		data = fpVideos[p]
+		data = p
 	}
 
 	var list []string
