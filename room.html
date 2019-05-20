@@ -97,6 +97,11 @@
 		  background: gainsboro;
 		  cursor: pointer;
 	  }
+	  aside > #list li.watched > span::after {
+		  content: " ⧗";
+		  color: orangered;
+	  }
+
 	  aside > #list li.dir > span::before {
 		  content: "↳ ";
 		  font-weight: bold;
@@ -185,6 +190,9 @@
 
 	var uid = -1;
 	var tpad = 0.75;
+	var watched = (d => {
+		return d ? JSON.parse(d) : {};
+	})(document.cookie.replace(/(?:(?:^|.*;\s*)watched\=([^;]*).*$|^.*$)/, "$1"));
 
 	function send(op, data) {
 		socket.send(JSON.stringify({
@@ -213,7 +221,17 @@
 			li.appendChild(span);
 
 			if ((typeof tree[name]) === 'string') {
-				span.onclick = _ => send("select", tree[name]);
+				span.onclick = _ => {
+					send("select", tree[name]);
+					li.classList.add("watched");
+					li.title = watched[tree[name]] = new Date();
+					document.cookie = "watched=" + JSON.stringify(watched);
+				};
+				if (tree[name] in watched) {
+					li.classList.add("watched");
+					li.title = watched[tree[name]];
+				}
+
 			} else {
 				span.onclick = _ => li.classList.toggle("opened");
 				li.classList.add("dir");
