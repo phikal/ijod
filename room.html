@@ -190,6 +190,7 @@
 
 	var uid = -1;
 	var tpad = 0.75;
+	var backli = {};
 	var watched = (d => {
 		return d ? JSON.parse(d) : {};
 	})(document.cookie.replace(/(?:(?:^|.*;\s*)watched\=([^;]*).*$|^.*$)/, "$1"));
@@ -211,9 +212,16 @@
 		log.scrollTop = log.scrollHeight - 12;
 	}
 
+	function notevideo(vid) {
+		li.classList.add("watched");
+		li.title = watched[tree[name]] = new Date();
+		document.cookie = "watched=" +
+			JSON.stringify(watched) +
+			"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+	}
+
 	function loadtree(tree) {
 		let ul = document.createElement("ul");
-
 		Object.keys(tree).map((name, idx) => {
 			let li = document.createElement("li");
 			let span = document.createElement("span");
@@ -221,17 +229,12 @@
 			li.appendChild(span);
 
 			if ((typeof tree[name]) === 'string') {
-				span.onclick = _ => {
-					send("select", tree[name]);
-					li.classList.add("watched");
-					li.title = watched[tree[name]] = new Date();
-					document.cookie = "watched=" + JSON.stringify(watched);
-				};
+				span.onclick = _ => send("select", tree[name]);
 				if (tree[name] in watched) {
 					li.classList.add("watched");
 					li.title = watched[tree[name]];
 				}
-
+				backli[tree[name]] = li;
 			} else {
 				span.onclick = _ => li.classList.toggle("opened");
 				li.classList.add("dir");
@@ -255,6 +258,13 @@
 		if (msg.name)
 			logmsg(msg.name + " selected " + msg.data,
 				   "lightgreen");
+
+		var li = backli[msg.data];
+		li.classList.add("watched");
+		li.title = watched[msg.data] = new Date();
+		document.cookie = "watched=" +
+			JSON.stringify(watched) +
+			"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
 	}
 
 	socket.onmessage = evt => {
