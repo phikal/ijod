@@ -184,8 +184,8 @@
 
 	const room = {{ . }};
 	const socket = new WebSocket(
-		"ws://" + location.hostname + ":" + location.port +
-			"/socket?id=" + room
+		location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "") +
+		"/socket?id=" + room
 	);
 
 	var uid = -1;
