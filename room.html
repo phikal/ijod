@@ -165,7 +165,7 @@
   </head>
   <body>
 	<main>
-	  <video id="video" controls>
+	  <video id="video" controls preload="metadata">
 		Oh no! This browser doesn’t support HTML video.
 	  </video>
 	</main>
@@ -242,21 +242,30 @@
 	}
 		
 	function select(msg) {
-		video.src = "/data/" + msg.data;
-		video.load();
-		video.currentTime = 0;
-		header.classList.add("loading");
-		header.innerText = msg.data;
-		if (msg.name)
-			logmsg(msg.name + " selected " + msg.data,
-				   "lightgreen");
+		while (video.firstChild)
+			video.firstChild.remove();
+		if (msg.data.match(/\.vtt$/)) {
+			var track = document.createElement("track");
+			track.kind = "subtitles";
+			track.src = "/data/" + msg.data;
+			video.appendChild(track);
+		} else {
+			video.src = "/data/" + msg.data;
+			video.load();
+			video.currentTime = 0;
+			header.classList.add("loading");
+			header.innerText = msg.data;
+			if (msg.name)
+				logmsg(msg.name + " selected " + msg.data,
+					   "lightgreen");
 
-		var li = backli[msg.data];
-		li.classList.add("watched");
-		li.title = watched[msg.data] = new Date();
-		document.cookie = "watched=" +
-			JSON.stringify(watched) +
-			"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+			var li = backli[msg.data];
+			li.classList.add("watched");
+			li.title = watched[msg.data] = new Date();
+			document.cookie = "watched=" +
+				JSON.stringify(watched) +
+				"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+		}
 	}
 
 	socket.onmessage = evt => {
