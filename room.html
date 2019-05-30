@@ -212,14 +212,6 @@
 		log.scrollTop = log.scrollHeight - 12;
 	}
 
-	function notevideo(vid) {
-		li.classList.add("watched");
-		li.title = watched[tree[name]] = new Date();
-		document.cookie = "watched=" +
-			JSON.stringify(watched) +
-			"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
-	}
-
 	function loadtree(tree) {
 		let ul = document.createElement("ul");
 		Object.keys(tree).map((name, idx) => {
