@@ -248,16 +248,20 @@
 			var track = document.createElement("track");
 			track.kind = "subtitles";
 			track.src = "/data/" + msg.data;
+			track.label = "Subtitles";
 			video.appendChild(track);
+			video.textTracks[0].mode = "showing";
+			logmsg(msg.name + " selected subtitles " + msg.data,
+				   "lightsalmon");
+
 		} else {
 			video.src = "/data/" + msg.data;
 			video.load();
 			video.currentTime = 0;
 			header.classList.add("loading");
 			header.innerText = msg.data;
-			if (msg.name)
-				logmsg(msg.name + " selected " + msg.data,
-					   "lightgreen");
+			logmsg(msg.name + " selected " + msg.data,
+				   "lightgreen");
 
 			var li = backli[msg.data];
 			li.classList.add("watched");
