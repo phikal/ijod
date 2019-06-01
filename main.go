@@ -26,7 +26,7 @@ func main() {
 <meta name="viewport" content="width=device-width" />
 <pre><strong>IJOD:</strong> <a href="/new">new room</a>
 
-read the <a href="https://git.sr.ht/~zge/ijod">source</a>!`)
+(─‿‿─) .oO(<em>read the <a href="https://git.sr.ht/~zge/ijod">source</a>!</em>)`)
 	if *indexFile != "" {
 		index, err = ioutil.ReadFile(*indexFile)
 		if err != nil {
