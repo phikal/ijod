@@ -20,13 +20,15 @@ var (
 // Room represents a collection of users and a selected video.
 type Room struct {
 	sync.Mutex
-	name  string
-	vid   *Video
-	vids  map[string]*Video
-	users map[*User]bool
-	wait  chan *User
-	mon   chan<- *Message
-	close sync.Once
+	name     string
+	vid      *Video
+	vids     map[string]*Video
+	users    map[*User]bool
+	hasAdmin bool
+	admin    *User
+	wait     chan *User
+	mon      chan<- *Message
+	close    sync.Once
 }
 
 func init() {
@@ -52,13 +54,19 @@ func room(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := tmpl.Execute(w, room.name)
+	err := tmpl.Execute(w, struct {
+		Name  string
+		Admin bool
+	}{
+		room.name,
+		room.hasAdmin,
+	})
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func newRoom() string {
+func newRoom(admin bool) string {
 	rlock.Lock()
 	defer rlock.Unlock()
 
@@ -77,6 +85,7 @@ func newRoom() string {
 		}
 	}
 	room.refreshVideos()
+	room.hasAdmin = admin
 
 	log.Println("Created room", room.name)
 	go room.monitor()

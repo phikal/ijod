@@ -1,6 +1,6 @@
 <html>
   <head>
-	<title>Ijod: {{ . }}</title>
+	<title>Ijod: {{ .Name }}</title>
 	<meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="referrer" content="none" />
@@ -93,7 +93,7 @@
 		  display: block;
 	  }
 	  
-	  aside > #list li > span:hover {
+	  body:not(.deprev) aside > #list li > span:hover {
 		  background: gainsboro;
 		  cursor: pointer;
 	  }
@@ -182,7 +182,7 @@
 	const header = document.getElementById("status");
 	const log = document.getElementById("log");
 
-	const room = {{ . }};
+	const room = {{ .Name }};
 	const socket = new WebSocket(
 		location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "") +
 		"/socket?id=" + room
