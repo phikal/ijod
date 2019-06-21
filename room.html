@@ -191,6 +191,7 @@
 	var uid = -1;
 	var tpad = 0.75;
 	var backli = {};
+	var opened = [];
 	var watched = (d => {
 		return d ? JSON.parse(d) : {};
 	})(document.cookie.replace(/(?:(?:^|.*;\s*)watched\=([^;]*).*$|^.*$)/, "$1"));
@@ -228,6 +229,16 @@
 				}
 				backli[tree[name]] = li;
 			} else {
+				if (li.classList.contains("opened")) {
+					let index = opened.indexOf("opened");
+					if (index !== -1) opened.splice(index, 1);
+				} else {
+					opened.push(tree[name]);
+				}
+
+				if (opened.indexOf("opened") > -1)
+					li.classList.add("opened");
+
 				span.onclick = _ => li.classList.toggle("opened");
 				li.classList.add("dir");
 				
