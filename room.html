@@ -139,6 +139,10 @@
 		  margin: 4px 0;
 	  }
 
+	  aside > #log > li > a {
+		  color: inherit;
+	  }
+
 	  aside > #log > li:first-of-type {
 		  border-top-width: 0;
 		  margin-top: 0;
@@ -204,9 +208,18 @@
 		}));
 	}
 
-	function logmsg(msg, color) {
+	function logmsg(msg, color, user) {
 		let li = document.createElement("li");
-		li.innerHTML = msg;
+		li.innerHTML = "";
+		if (user) {
+			{{ with .UseWiki }}
+			li.innerHTML += "<a target=\"_blank\" href=\"{{ . }}/" + user + "\">" + user +
+		"</a> ";
+			{{ else }}
+			li.innerHTML += user " ";
+			{{ end }}
+		}
+		li.innerHTML += msg;
 		li.style.color = color;
 		li.title = new Date();
 		log.appendChild(li);
@@ -262,8 +275,8 @@
 			track.label = "Subtitles";
 			video.appendChild(track);
 			video.textTracks[0].mode = "showing";
-			logmsg(msg.name + " selected subtitles " + msg.data,
-				   "lightsalmon");
+			logmsg("selected subtitles " + msg.data,
+				   "lightsalmon", msg.name);
 
 		} else {
 			video.src = "/data/" + msg.data;
@@ -271,8 +284,8 @@
 			video.currentTime = 0;
 			header.classList.add("loading");
 			header.innerText = msg.data;
-			logmsg(msg.name + " selected " + msg.data,
-				   "lightgreen");
+			logmsg("selected " + msg.data,
+				   "lightgreen", msg.name);
 
 			var li = backli[msg.data];
 			li.classList.add("watched");
@@ -301,7 +314,7 @@
 					video.pause();
 				}
 				if (msg.name)
-					logmsg(msg.name + " paused video", "lightcoral");
+					logmsg("paused video", "lightcoral", msg.name);
 				break;
 			case "play":
 				if (msg.from != uid &&
@@ -310,16 +323,16 @@
 					video.play();
 				}
 				if (msg.name)
-					logmsg(msg.name + " continued playback", "lightcyan");
+					logmsg("continued playback", "lightcyan", msg.name);
 				header.classList.remove("loading");
 				break;
 			case "time":
 				if (msg.data &&
 					Math.abs(msg.data - video.currentTime) > tpad) {
 					logmsg(msg.data < video.currentTime ?
-						   msg.name + " jumped backwards" :
-						   msg.name + " jumped forwards",
-						   "blanchedalmond");
+						   "jumped backwards" :
+						   "jumped forwards",
+						   "blanchedalmond", msg.name);
 					video.currentTime = msg.data;
 				}
 				break;
@@ -327,10 +340,9 @@
 			case "uid": uid = msg.data; break;
 			case "select": select(msg); break;
 			case "msg": logmsg(msg.data); break;
-			case "leave": logmsg(msg.name + " has left", "silver"); break;
-			case "join": logmsg(msg.name + " joined" +
-								(msg.data == uid ? " (this is you)" : ""),
-								"silver"); break;
+			case "leave": logmsg("has left", "silver", msg.name); break;
+			case "join": logmsg("joined" + (msg.data == uid ? " (this is you)" : ""),
+								"silver", msg.name); break;
 			case "pos": send("pos", video.currentTime); break;
 			case "who": logmsg("In this room: " + msg.data.join(", "),
 							   "peachpuff"); break;

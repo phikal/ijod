@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -15,6 +16,8 @@ var (
 
 	rooms = make(map[string]*Room)
 	rlock sync.Mutex
+
+	useWiki string
 )
 
 // Room represents a collection of users and a selected video.
@@ -55,11 +58,13 @@ func room(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := tmpl.Execute(w, struct {
-		Name  string
-		Admin bool
+		Name    string
+		Admin   bool
+		UseWiki string
 	}{
 		room.name,
 		room.hasAdmin,
+		strings.TrimSuffix(useWiki, "/"),
 	})
 	if err != nil {
 		log.Println(err)

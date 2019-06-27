@@ -16,6 +16,7 @@ func main() {
 	names := flag.String("words", "/usr/share/dict/words", "word-file to user for names")
 	indexFile := flag.String("index", "", "file to serve as an index page")
 	debug := flag.Bool("debug", false, "turn debugging mode on")
+	flag.StringVar(&useWiki, "wiki", "", "use wiki prefix link for names")
 	flag.Parse()
 
 	// attempt to find index asset
