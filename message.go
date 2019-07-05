@@ -13,6 +13,28 @@ type Message struct {
 	Data interface{} `json:"data"`
 }
 
+func (u *User) join() {
+	for w := range u.room.users {
+		if u != w {
+			w.send("pos", nil, u)
+		}
+	}
+	if len(u.room.users) > 1 {
+		var users []*User
+		for v := range u.room.users {
+			if u != v {
+				users = append(users, v)
+			}
+		}
+		u.send("who", users, u)
+		u.room.wait <- u
+	} else {
+		u.sendStatus(nil)
+	}
+	u.room.send("join", u.id, u)
+
+}
+
 // Process selects an operation to execute, depending on the value of
 // OP.
 func (u *User) process(op string, data interface{}) {
@@ -21,24 +43,7 @@ func (u *User) process(op string, data interface{}) {
 		u.ready = true
 		u.room.startp()
 	case "join":
-		for w := range u.room.users {
-			if u != w {
-				w.send("pos", nil, u)
-			}
-		}
-		if len(u.room.users) > 1 {
-			var users []*User
-			for v := range u.room.users {
-				if u != v {
-					users = append(users, v)
-				}
-			}
-			u.send("who", users, u)
-			u.room.wait <- u
-		} else {
-			u.sendStatus(nil)
-		}
-		u.room.send("join", u.id, u)
+		u.join()
 	case "pos":
 		if val, ok := data.(float64); ok {
 			pos := time.Duration(float64(time.Second) * val)
