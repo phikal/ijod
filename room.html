@@ -195,7 +195,7 @@
 	var uid = -1;
 	var tpad = 0.75;
 	var backli = {};
-	var opened = [];
+	var opened = new Set();
 	var watched = (d => {
 		return d ? JSON.parse(d) : {};
 	})(document.cookie.replace(/(?:(?:^|.*;\s*)watched\=([^;]*).*$|^.*$)/, "$1"));
@@ -226,7 +226,7 @@
 		log.scrollTop = log.scrollHeight - 12;
 	}
 
-	function loadtree(tree) {
+	function loadtree(tree, parent) {
 		let ul = document.createElement("ul");
 		Object.keys(tree).map((name, idx) => {
 			let li = document.createElement("li");
@@ -242,20 +242,22 @@
 				}
 				backli[tree[name]] = li;
 			} else {
-				if (li.classList.contains("opened")) {
-					let index = opened.indexOf("opened");
-					if (index !== -1) opened.splice(index, 1);
-				} else {
-					opened.push(tree[name]);
-				}
-
-				if (opened.indexOf("opened") > -1)
+				let selfname = parent + "/" + name;
+				if (opened.has(selfname))
 					li.classList.add("opened");
 
-				span.onclick = _ => li.classList.toggle("opened");
+				span.onclick = _ => {
+					if (li.classList.contains("opened")) {
+						opened.delete(selfname);
+						li.classList.remove("opened");
+					} else {
+						opened.add(selfname);
+						li.classList.add("opened");
+					}
+				}
 				li.classList.add("dir");
 				
-				var subtree = loadtree(tree[name])
+				var subtree = loadtree(tree[name], name)
 				if (subtree) li.appendChild(subtree);
 			}
 
@@ -303,9 +305,10 @@
 			case "list":
 				while (list.firstChild)
 					list.firstChild.remove();
-				list.appendChild(loadtree(msg.data)
-								 .childNodes[0]
-								 .childNodes[1]);
+				let tree = loadtree(msg.data, "");
+				if ((tree.childNodes[0] &&
+					 tree.childNodes[0].childNodes[1]))
+					list.appendChild(tree.childNodes[0].childNodes[1]);
 				break;
 			case "pause":
 				if (msg.from != uid &&
