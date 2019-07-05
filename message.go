@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Message contains data sent to or from the server/client
 type Message struct {
 	Op   string      `json:"op"`
 	Name string      `json:"name,omitempty"`
