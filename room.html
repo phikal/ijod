@@ -358,7 +358,7 @@
 	}
 
 	socket.onopen = _ => send("join");
-	socket.onerror = msg => logmsg("ERROR: " + msg.message, "red");
+	socket.onclose = msg => logmsg("ERROR: " + msg.reason, "red");
 	video.onplay = _ => send("play", video.currentTime);
 	video.onseeked = video.onpause = _ => send("time", video.currentTime);
 	video.oncanplay = _ => send("ready");
