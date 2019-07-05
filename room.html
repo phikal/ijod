@@ -362,5 +362,6 @@
 	video.onplay = _ => send("play", video.currentTime);
 	video.onseeked = video.onpause = _ => send("time", video.currentTime);
 	video.oncanplay = _ => send("ready");
-  </script>
+	video.oncontextmenu = _ => false;
+	</script>
 </html>
