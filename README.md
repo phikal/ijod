@@ -66,7 +66,7 @@ and `ijod` should appear in the working directory.
   streaming.
 - Ijod is inspired and conceptually based on an older project of mine,
   called [Doji][doji].
-- If any issues or questions come up, send an email to the [mailing list][mail].
+- If any issues or questions come up, send an email to my [public inbox][mail].
 
 ## Legal
 
@@ -82,4 +82,4 @@ Ijod is distributed under [CC0 Universal Public Domain Dedication][cc0]
 [youtube-dl]: https://ytdl-org.github.io/youtube-dl/
 [cc0]: https://creativecommons.org/publicdomain/zero/1.0/deed
 [doji]: http://zge.us.to/proj/doji/
-[mail]: https://lists.sr.ht/~zge/ijod
+[mail]: https://lists.sr.ht/~zge/public-inbox
