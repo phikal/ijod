@@ -196,9 +196,7 @@
 	var tpad = 0.75;
 	var backli = {};
 	var opened = new Set();
-	var watched = (d => {
-		return d ? JSON.parse(d) : {};
-	})(document.cookie.replace(/(?:(?:^|.*;\s*)watched\=([^;]*).*$|^.*$)/, "$1"));
+	var watched = window.localStorage.getItem("watched");
 
 	function send(op, data) {
 		socket.send(JSON.stringify({
@@ -292,9 +290,7 @@
 			var li = backli[msg.data];
 			li.classList.add("watched");
 			li.title = watched[msg.data] = new Date();
-			document.cookie = "watched=" +
-				JSON.stringify(watched) +
-				"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+			window.localStorage.setItem("watched", watched);
 		}
 	}
 
