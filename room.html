@@ -196,7 +196,7 @@
 	var tpad = 0.75;
 	var backli = {};
 	var opened = new Set();
-	var watched = window.localStorage.getItem("watched");
+	var watched = JSON.parse(window.localStorage.getItem("watched")) || {};
 
 	function send(op, data) {
 		socket.send(JSON.stringify({
@@ -290,7 +290,7 @@
 			var li = backli[msg.data];
 			li.classList.add("watched");
 			li.title = watched[msg.data] = new Date();
-			window.localStorage.setItem("watched", watched);
+			window.localStorage.setItem("watched", JSON.stringify(watched));
 		}
 	}
 
