@@ -14,12 +14,11 @@ import (
 var (
 	vlock  sync.Mutex
 	videos map[string]interface{}
-	dirs   map[string]map[string]interface{}
 )
 
 func init() {
 	go func() {
-		c := make(chan os.Signal)
+		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGUSR1)
 
 		for {
