@@ -25,13 +25,14 @@ type Room struct {
 	sync.Mutex
 	name     string
 	vid      *Video
-	vids     map[string]*Video
 	users    map[*User]bool
 	hasAdmin bool
 	admin    *User
 	wait     chan *User
 	mon      chan<- *Message
 	close    sync.Once
+	playing  bool
+	updated  time.Time
 }
 
 func init() {
@@ -53,7 +54,7 @@ func room(w http.ResponseWriter, r *http.Request) {
 <title>Ijod?</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-<pre>This room has been destroyed. Create a <a href="/">new one</a>.`)
+<pre>This room has been destroyed. Create a <a href="/new">new one</a>.`)
 		return
 	}
 
@@ -89,33 +90,11 @@ func newRoom(admin bool) string {
 			break
 		}
 	}
-	room.refreshVideos()
 	room.hasAdmin = admin
 
 	log.Println("Created room", room.name)
 	go room.monitor()
 	return "/room?id=" + room.name
-}
-
-func (r *Room) refreshVideos() {
-	vids := make(map[string]*Video)
-
-	var d map[string]interface{}
-	var queue = []map[string]interface{}{videos}
-	for len(queue) > 0 {
-		d, queue = queue[0], queue[1:]
-		for _, i := range d {
-			if path, ok := i.(string); ok {
-				vids[path] = &Video{path: path}
-			} else if m, ok := i.(map[string]interface{}); ok {
-				queue = append(queue, m)
-			}
-		}
-	}
-
-	r.Lock()
-	r.vids = vids
-	r.Unlock()
 }
 
 // send a message to all users

@@ -1,72 +1,52 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
-	"os/signal"
-	"path"
 	"path/filepath"
 	"sync"
-	"syscall"
 )
+
+const aclFile = ".ijod"
 
 var (
 	vlock  sync.Mutex
-	videos map[string]interface{}
+	videos *Directory
 )
 
-func init() {
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGUSR1)
-
-		for {
-			err := loadVideos()
-			if err != nil {
-				log.Println(err)
-			}
-
-			for _, r := range rooms {
-				r.refreshVideos()
-				for u := range r.users {
-					u.listVideos()
-				}
-			}
-			<-c
-		}
-	}()
+// Node is either a Video or a Directory
+type Node interface {
+	MarshalJSON() ([]byte, error)
 }
 
-func walkDir(p string, info os.FileInfo, err error) error {
+func refresher(c <-chan os.Signal) {
+	for {
+		err := loadVideos()
+		if err != nil {
+			log.Println(err)
+		}
+
+		for _, r := range rooms {
+			for u := range r.users {
+				u.listVideos()
+			}
+		}
+		<-c
+	}
+}
+
+func walker(p string, info os.FileInfo, err error) error {
 	if err != nil {
 		return err
 	}
 
-	var data interface{}
+	var node Node
 	if info.IsDir() {
-		data = make(map[string]interface{})
+		node = NewDirectory(filepath.Join(p, aclFile))
 	} else {
-		data = p
+		node = (*Video)(&p)
 	}
-
-	var list []string
-	for p != "." {
-		list = append(list, path.Base(p))
-		p = path.Dir(p)
-	}
-	list = append(list, p)
-
-	var ok bool
-	place := videos
-
-	for i := len(list) - 1; i > 0; i-- {
-		place, ok = place[list[i]].(map[string]interface{})
-		if !ok {
-			return errors.New("not a place")
-		}
-	}
-	place[list[0]] = data
+	videos.set(p, node)
 
 	return nil
 }
@@ -75,6 +55,6 @@ func loadVideos() error {
 	vlock.Lock()
 	defer vlock.Unlock()
 
-	videos = make(map[string]interface{})
-	return filepath.Walk(".", walkDir)
+	videos = NewDirectory("")
+	return filepath.Walk(".", walker)
 }

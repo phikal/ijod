@@ -1,17 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
-	"sync"
 	"time"
 )
 
 // Video stores the information about one video in one room
-type Video struct {
-	sync.Mutex
-	path    string
-	playing bool
-	updated time.Time
+type Video string
+
+func (v *Video) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(string(*v))
+	return buf.Bytes(), nil
 }
 
 func (r *Room) selectVideo(name string, from *User) error {
@@ -22,13 +24,11 @@ func (r *Room) selectVideo(name string, from *User) error {
 	r.Lock()
 	defer r.Unlock()
 
-	var ok bool
-	if r.vid, ok = r.vids[name]; !ok {
+	vid := videos.find(name)
+	if vid == nil {
 		return errors.New("No such video: " + name)
-	} else if ok {
-		r.send("select", name, from)
 	}
-
+	r.send("select", name, from)
 	return nil
 }
 
@@ -41,12 +41,12 @@ func (r *Room) pause(from *User) {
 		return
 	}
 
-	if r.vid == nil || !r.vid.playing {
+	if r.vid == nil || !r.playing {
 		return
 	}
 
 	r.send("pause", nil, from)
-	r.vid.playing = false
+	r.playing = false
 }
 
 // play continues the video, if it is been paused, and doesn't change
@@ -58,12 +58,12 @@ func (r *Room) play(from *User) {
 		return
 	}
 
-	if r.vid == nil || r.vid.playing {
+	if r.vid == nil || r.playing {
 		return
 	}
 
 	r.send("play", nil, from)
-	r.vid.playing = true
+	r.playing = true
 }
 
 // jumpTo sets a absolute position in the video
@@ -76,14 +76,11 @@ func (r *Room) jumpTo(pos float64, from *User) {
 		return
 	}
 
-	r.vid.Lock()
-	defer r.vid.Unlock()
-
-	if time.Since(r.vid.updated) < time.Millisecond*500 {
+	if time.Since(r.updated) < time.Millisecond*500 {
 		return
 	}
 
-	r.vid.updated = time.Now()
+	r.updated = time.Now()
 	r.pause(from)
 	r.send("time", pos, from)
 }

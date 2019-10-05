@@ -30,12 +30,15 @@ func socket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := newUser(room)
+	user := newUser(room, r)
 	defer user.leave()
 
 	go func() {
 		for msg := range user.msgs {
-			log.Println(msg)
+			// var buf bytes.Buffer
+			// json.NewEncoder(&buf).Encode(msg)
+			// log.Println(buf.String())
+			log.Println("sending", msg)
 			err := conn.WriteJSON(msg)
 			if err != nil {
 				log.Println(err)

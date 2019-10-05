@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 	"time"
 )
 
@@ -17,6 +18,7 @@ type User struct {
 	ready bool
 	room  *Room
 	pos   *time.Duration
+	auth  string
 }
 
 // MarshalJSON transforms a User into a JSON object, by turning it into
@@ -26,14 +28,17 @@ func (u *User) MarshalJSON() ([]byte, error) {
 }
 
 // newUser adds a new user to room
-func newUser(room *Room) *User {
+func newUser(room *Room, r *http.Request) *User {
 	room.Lock()
 	defer room.Unlock()
+
+	auth, _, _ := r.BasicAuth()
 	u := &User{
 		id:   counter,
 		msgs: make(chan *Message, 1<<4),
 		room: room,
 		name: words[counter%len(words)],
+		auth: auth,
 	}
 
 	room.users[u] = true
@@ -61,18 +66,20 @@ func (u *User) send(op string, data interface{}, from *User) {
 
 // leave cleans up after a user has closed his connection
 func (u *User) leave() {
+	log.Printf("%s attempts to leave room %s", u.name, u.room.name)
 	u.room.Lock()
 	delete(u.room.users, u)
 	u.room.Unlock()
 	u.room.mon <- &Message{Op: "leave"}
 	u.room.send("leave", u.name, u)
+	log.Printf("%s has left room %s", u.name, u.room.name)
 }
 
-// sendStatus is a meta function to send all necessary information about
-// the current state of the room to a user u
+// sendStatus is a utility function to send all necessary information
+// about the current state of the room to a user u
 func (u *User) sendStatus(pos *time.Duration) {
 	if u.room.vid != nil {
-		u.send("select", u.room.vid.path, nil)
+		u.send("select", u.room.vid, nil)
 	}
 	if pos != nil {
 		u.send("time", pos.Seconds(), nil)
@@ -83,7 +90,7 @@ func (u *User) sendStatus(pos *time.Duration) {
 // listVideos sends a list of all available videos back to the client
 // that requested it
 func (u *User) listVideos() {
-	u.send("list", videos, nil)
+	u.send("list", videos.filterFor(u), nil)
 }
 
 // setPos is used by the client to inform the server of the current
@@ -110,7 +117,7 @@ func (u *User) setPos(pos time.Duration) {
 				u.pos = nil
 			}
 		}
-		avg /= time.Duration(len(u.room.users))
+		avg /= time.Duration(len(u.room.users) - 1)
 
 		select {
 		case user := <-u.room.wait:

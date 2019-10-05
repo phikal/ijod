@@ -288,9 +288,11 @@
 				   "lightgreen", msg.name);
 
 			var li = backli[msg.data];
-			li.classList.add("watched");
-			li.title = watched[msg.data] = new Date();
-			window.localStorage.setItem("watched", JSON.stringify(watched));
+			if (li) {
+				li.classList.add("watched");
+				li.title = watched[msg.data] = new Date();
+				window.localStorage.setItem("watched", JSON.stringify(watched));
+			}
 		}
 	}
 
@@ -301,10 +303,7 @@
 			case "list":
 				while (list.firstChild)
 					list.firstChild.remove();
-				let tree = loadtree(msg.data, "");
-				if ((tree.childNodes[0] &&
-					 tree.childNodes[0].childNodes[1]))
-					list.appendChild(tree.childNodes[0].childNodes[1]);
+				list.appendChild(loadtree(msg.data, ""));
 				break;
 			case "pause":
 				if (msg.from != uid &&
@@ -354,7 +353,7 @@
 	}
 
 	socket.onopen = _ => send("join");
-	socket.onclose = msg => logmsg("ERROR: " + msg.reason, "red");
+	socket.onclose = msg => logmsg("ERROR", "red");
 	video.onplay = _ => send("play", video.currentTime);
 	video.onseeked = video.onpause = _ => send("time", video.currentTime);
 	video.oncanplay = _ => send("ready");

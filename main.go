@@ -7,6 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -35,11 +38,19 @@ func main() {
 		}
 	}
 
+	// load valid authentications
+	if *auth != "" {
+		auths, err = loadAuthFile(*auth)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	// enable debugging mode, if requested
 	if *debug {
 		log.SetFlags(log.LUTC | log.Lshortfile | log.Ltime)
 	} else {
-		log.SetFlags(0)
+		log.SetFlags(log.LstdFlags)
 		log.SetOutput(ioutil.Discard)
 	}
 
@@ -50,9 +61,14 @@ func main() {
 	}
 	log.Printf("Read in %d names\n", len(words))
 
+	// listen to signals to refresh video tree
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGUSR1)
+	go refresher(c)
+
 	// initialise and start HTTP server
 	mux := http.NewServeMux()
-	fs := http.FileServer(http.Dir("."))
+	fs := http.FileServer(http.Dir(".")) // TODO: prevent directory listing
 	mux.Handle("/data/", http.StripPrefix("/data/", fs))
 	mux.HandleFunc("/socket", socket)
 	mux.HandleFunc("/room", room)
@@ -70,12 +86,11 @@ func main() {
 				return
 			}
 
-			tryUser, tryPass, _ := r.BasicAuth()
-			if tryUser+":"+tryPass != *auth {
+			if checkRequest(r) {
+				mux.ServeHTTP(w, r)
+			} else {
 				w.Header().Set("WWW-Authenticate", `Basic realm="auth"`)
 				http.Error(w, "Unauthorized.", http.StatusUnauthorized)
-			} else {
-				mux.ServeHTTP(w, r)
 			}
 		})
 	} else {
