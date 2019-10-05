@@ -50,7 +50,7 @@ func main() {
 	if *debug {
 		log.SetFlags(log.LUTC | log.Lshortfile | log.Ltime)
 	} else {
-		log.SetFlags(log.LstdFlags)
+		log.SetFlags(0)
 		log.SetOutput(ioutil.Discard)
 	}
 
