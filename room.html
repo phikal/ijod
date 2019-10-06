@@ -62,12 +62,16 @@
 		  content: "Watching ";
 	  }
 
-	  aside > header.loading {
+	  .loading aside > header {
 		  background: tomato;
 		  cursor: default;
 	  }
-	  aside > header.loading::before {
+	  .loading aside > header::before {
 		  content: "Loading ";
+	  }
+
+	  .loading video {
+		  filter: grayscale(100%) blur(4px);
 	  }
 
 	  aside > #list {
@@ -181,6 +185,7 @@
   </body>
   <script>
 	"use strict";
+	const root = document.documentElement;
 	const video = document.getElementById("video");
 	const list = document.getElementById("list");
 	const header = document.getElementById("status");
@@ -282,7 +287,7 @@
 			video.src = "/data/" + msg.data;
 			video.load();
 			video.currentTime = 0;
-			header.classList.add("loading");
+			root.classList.add("loading");
 			header.innerText = msg.data;
 			logmsg("selected " + msg.data,
 				   "lightgreen", msg.name);
@@ -322,7 +327,7 @@
 				}
 				if (msg.name)
 					logmsg("continued playback", "lightcyan", msg.name);
-				header.classList.remove("loading");
+				root.classList.remove("loading");
 				break;
 			case "time":
 				if (msg.data &&
