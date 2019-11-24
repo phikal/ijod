@@ -19,6 +19,7 @@ func main() {
 	names := flag.String("words", "/usr/share/dict/words", "word-file to user for names")
 	indexFile := flag.String("index", "", "file to serve as an index page")
 	debug := flag.Bool("debug", false, "turn debugging mode on")
+	dir := flag.String("dir", "", "directory to serve")
 	flag.StringVar(&useWiki, "wiki", "", "use wiki prefix link for names")
 	flag.Parse()
 
@@ -41,6 +42,14 @@ func main() {
 	// load valid authentications
 	if *auth != "" {
 		auths, err = loadAuthFile(*auth)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// change directory
+	if *dir != "" {
+		err := os.Chdir(*dir)
 		if err != nil {
 			log.Fatal(err)
 		}
