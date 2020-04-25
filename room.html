@@ -327,12 +327,16 @@
 				root.classList.remove("loading");
 				break;
 			case "time":
-				if (msg.data &&
-					Math.abs(msg.data - video.currentTime) > tpad) {
-					logmsg(msg.data < video.currentTime ?
-						   "jumped backwards" :
-						   "jumped forwards",
-						   "blanchedalmond", msg.name);
+				var hours   = Math.floor(msg.data / 3600);
+				var minutes = Math.floor((msg.data % 3600) / 60);
+				var seconds = Math.floor(msg.data % 60);
+				var hhmmss =
+					((hours   < 10) ? "0" + hours : hours) + ":" +
+					((minutes < 10) ? "0" + minutes : minutes) + ":"  +
+					((seconds < 10) ? "0" + seconds : seconds)
+
+				if (msg.data && Math.abs(msg.data - video.currentTime) > tpad) {
+					logmsg("jumped to " + hhmmss, "blanchedalmond", msg.name);
 					video.currentTime = msg.data;
 				}
 				break;
