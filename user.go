@@ -32,12 +32,19 @@ func newUser(room *Room, r *http.Request) *User {
 	room.Lock()
 	defer room.Unlock()
 
+	var word string
+	if words != nil {
+		word = words[counter%len(words)]
+	} else {
+		word = fmt.Sprint(counter)
+	}
+
 	auth, _, _ := r.BasicAuth()
 	u := &User{
 		id:   counter,
 		msgs: make(chan *Message, 1<<4),
 		room: room,
-		name: words[counter%len(words)],
+		name: word,
 		auth: auth,
 	}
 

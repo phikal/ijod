@@ -66,9 +66,10 @@ func main() {
 	// load file with words for words in it
 	err = loadNames(*names)
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("Words file not found (%s), defaulting to IDs", err)
+	} else {
+		log.Printf("Read in %d names from %s\n", len(words), *names)
 	}
-	log.Printf("Read in %d names\n", len(words))
 
 	// listen to signals to refresh video tree
 	c := make(chan os.Signal, 1)
