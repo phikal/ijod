@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 if [ -z "$1" ]
 then
 	echo "usage: $1 [file]" >&2
