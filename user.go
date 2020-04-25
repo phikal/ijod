@@ -106,7 +106,7 @@ func (u *User) setPos(pos time.Duration) {
 		}
 	}
 
-	if ready+2 >= len(u.room.users) {
+	if ready >= len(u.room.users)-1 {
 		var avg time.Duration
 		for u := range u.room.users {
 			if u.pos != nil {
