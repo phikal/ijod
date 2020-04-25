@@ -42,9 +42,6 @@ func newUser(room *Room, r *http.Request) *User {
 	}
 
 	room.users[u] = true
-	if room.hasAdmin && room.admin == nil {
-		room.admin = u
-	}
 	u.send("uid", u.id, u)
 	counter++
 

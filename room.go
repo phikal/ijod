@@ -26,8 +26,6 @@ type Room struct {
 	name     string
 	vid      *Video
 	users    map[*User]bool
-	hasAdmin bool
-	admin    *User
 	wait     chan *User
 	mon      chan<- *Message
 	close    sync.Once
@@ -60,11 +58,9 @@ func room(w http.ResponseWriter, r *http.Request) {
 
 	err := tmpl.Execute(w, struct {
 		Name    string
-		Admin   bool
 		UseWiki string
 	}{
 		room.name,
-		room.hasAdmin,
 		strings.TrimSuffix(useWiki, "/"),
 	})
 	if err != nil {
@@ -72,7 +68,7 @@ func room(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func newRoom(admin bool) string {
+func newRoom() string {
 	rlock.Lock()
 	defer rlock.Unlock()
 
@@ -90,7 +86,6 @@ func newRoom(admin bool) string {
 			break
 		}
 	}
-	room.hasAdmin = admin
 
 	log.Println("Created room", room.name)
 	go room.monitor()

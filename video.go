@@ -17,10 +17,6 @@ func (v *Video) MarshalJSON() ([]byte, error) {
 }
 
 func (r *Room) selectVideo(name string, from *User) error {
-	if r.hasAdmin && r.admin != from {
-		return nil
-	}
-
 	r.Lock()
 	defer r.Unlock()
 
@@ -37,10 +33,6 @@ func (r *Room) selectVideo(name string, from *User) error {
 //
 // a "pause"-signal is sent to all members of this room
 func (r *Room) pause(from *User) {
-	if r.hasAdmin && r.admin != from {
-		return
-	}
-
 	if r.vid == nil || !r.playing {
 		return
 	}
@@ -54,10 +46,6 @@ func (r *Room) pause(from *User) {
 //
 // a "play"-signal is sent to all members of this room
 func (r *Room) play(from *User) {
-	if r.hasAdmin && r.admin != from {
-		return
-	}
-
 	if r.vid == nil || r.playing {
 		return
 	}
@@ -68,10 +56,6 @@ func (r *Room) play(from *User) {
 
 // jumpTo sets a absolute position in the video
 func (r *Room) jumpTo(pos float64, from *User) {
-	if r.hasAdmin && r.admin != from {
-		return
-	}
-
 	if r.vid == nil {
 		return
 	}

@@ -29,7 +29,7 @@ func main() {
 <title>Ijod!</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-<pre><strong>IJOD:</strong> <a href="/new">new room</a> (<a href="/new?admin=t">as admin</a>)
+<pre><strong>IJOD:</strong> <a href="/new">new room</a>
 
 (─‿‿─) .oO(<em>read the <a href="https://git.sr.ht/~zge/ijod">source</a>!</em>)`)
 	if *indexFile != "" {
@@ -82,8 +82,7 @@ func main() {
 	mux.HandleFunc("/socket", socket)
 	mux.HandleFunc("/room", room)
 	mux.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
-		admin := r.URL.Query().Get("admin") != ""
-		http.Redirect(w, r, newRoom(admin), http.StatusFound)
+		http.Redirect(w, r, newRoom(), http.StatusFound)
 	})
 
 	var handler http.Handler
