@@ -191,24 +191,21 @@
 	const header = document.getElementById("status");
 	const log = document.getElementById("log");
 
-	const room = {{ .Name }};
-	const socket = new WebSocket(
-		location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "") +
-		"/socket?id=" + room
-	);
-
 	var uid = -1;
 	var tpad = 0.75;
 	var backli = {};
 	var opened = new Set();
 	var watched = JSON.parse(window.localStorage.getItem("watched")) || {};
+	var socket;
 
 	function send(op, data) {
-		socket.send(JSON.stringify({
-			"op": op,
-			"data": data,
-			"from": uid
-		}));
+		if (socket) {
+			socket.send(JSON.stringify({
+				"op": op,
+				"data": data,
+				"from": uid
+			}));
+		}
 	}
 
 	function logmsg(msg, color, user) {
@@ -301,7 +298,7 @@
 		}
 	}
 
-	socket.onmessage = evt => {
+	function socket_msg(evt) {
 		var msg = JSON.parse(evt.data);
 		try {
 			switch (msg.op) {
@@ -347,7 +344,7 @@
 			case "join": logmsg("joined" + (msg.data == uid ? " (this is you)" : ""),
 								"silver", msg.name); break;
 			case "pos": send("pos", video.currentTime); break;
-			case "who": logmsg("In this room: " + msg.data.join(", "),
+			case "who": logmsg("In this {{ .Name }}: " + msg.data.join(", "),
 							   "peachpuff"); break;
 			default:
 				logmsg("Recieved unknown message: <code>" + msg + "</code>");
@@ -357,11 +354,23 @@
 		}
 	}
 
-	socket.onopen = _ => send("join");
-	socket.onclose = msg => logmsg("ERROR", "red");
 	video.onplay = _ => send("play", video.currentTime);
 	video.onseeked = video.onpause = _ => send("time", video.currentTime);
 	video.oncanplay = _ => send("ready");
 	video.oncontextmenu = _ => false;
+
+	function new_socket() {
+		let base = location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "");
+		let s = new WebSocket(base + "/socket?id={{ .Name }}");
+
+		s.onmessage = socket_msg;
+		s.onstalled = _ => send("wait");
+		s.onopen    = _ => send("join");
+		s.onclose   = new_socket;
+
+		socket = s;
+	}
+
+	new_socket();
 	</script>
 </html>
