@@ -359,8 +359,12 @@
 	}
 
 	video.onplay = _ => send("play", video.currentTime);
-	video.oncanplay = _ => send("ready");
 	video.onseeked = _ => video.pause();
+	video.oncanplay = _ => {
+		send("ready");
+		video.controls = true;
+		root.classList.remove("loading");
+	};
 
 	function new_socket() {
 		let base = location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "");
