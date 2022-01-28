@@ -1,379 +1,379 @@
 <html>
   <head>
-	<title>Ijod: {{ .Name }}</title>
-	<meta charset="utf-8" />
+    <title>Ijod: {{ .Name }}</title>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="referrer" content="none" />
-	<style>
-	  ::-webkit-scrollbar { width: 8px; }
-	  ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-	  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); }
+    <style>
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+      ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); }
 
-	  html, body {
-		  margin: 0;
-		  padding: 0;
-		  width: 100vw;
-		  height: 100vh;
-		  display: flex;
-		  flex-flow: column;
-		  font-family: Consolas, Hack, Monaco, monospace, monospace;
-		  font-size: 12px;
-		  min-width: 512px;
-		  overflow: hidden;
-	  }
+      html, body {
+          margin: 0;
+          padding: 0;
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          flex-flow: column;
+          font-family: Consolas, Hack, Monaco, monospace, monospace;
+          font-size: 12px;
+          min-width: 512px;
+          overflow: hidden;
+      }
 
-	  main, aside {
-		  position: absolute;
-	  }
+      main, aside {
+          position: absolute;
+      }
 
-	  main {
-		  background: black;
-		  flex-grow: 1;
-		  height: 100%;
-		  width: calc(100% - 256px);
-		  min-width: 256px;
-	  }
+      main {
+          background: black;
+          flex-grow: 1;
+          height: 100%;
+          width: calc(100% - 256px);
+          min-width: 256px;
+      }
 
-	  main > video {
-		  width: 100%;
-		  height: 100%;
-	  }
+      main > video {
+          width: 100%;
+          height: 100%;
+      }
 
-	  aside {
-		  background: whitesmoke;
-		  width: 256px;
-		  height: 100%;
-		  border-left: 1px solid gray;
-		  display: flex;
-		  flex-flow: column;
-		  align-self: flex-end;
-	  }
+      aside {
+          background: whitesmoke;
+          width: 256px;
+          height: 100%;
+          border-left: 1px solid gray;
+          display: flex;
+          flex-flow: column;
+          align-self: flex-end;
+      }
 
-	  aside > header {
-		  margin: 0;
-		  padding: 12px;
-		  border-bottom: 1px solid gray;
-		  overflow-wrap: break-word;
-	  }
+      aside > header {
+          margin: 0;
+          padding: 12px;
+          border-bottom: 1px solid gray;
+          overflow-wrap: break-word;
+      }
 
-	  aside > header { background: turquoise; }
-	  aside > header::before {
-		  font-weight: bold;
-		  content: "Watching ";
-	  }
+      aside > header { background: turquoise; }
+      aside > header::before {
+          font-weight: bold;
+          content: "Watching ";
+      }
 
-	  .loading aside > header {
-		  background: tomato;
-		  cursor: default;
-	  }
-	  .loading aside > header::before {
-		  content: "Loading ";
-	  }
+      .loading aside > header {
+          background: tomato;
+          cursor: default;
+      }
+      .loading aside > header::before {
+          content: "Loading ";
+      }
 
-	  aside > #list {
-		  list-style: none;
-		  flex: 1;
-		  padding: 0;
-		  margin: 0;
-		  overflow-y: auto;
-	  }
+      aside > #list {
+          list-style: none;
+          flex: 1;
+          padding: 0;
+          margin: 0;
+          overflow-y: auto;
+      }
 
-	  aside > #list ul {
-		  margin: 0;
-		  padding: 0;
-	  }
-	  
-	  aside > #list li {
-		  padding: 0;
-		  word-break: break-all;
-		  list-style: none;
-	  }
-	  aside > #list li > span {
-		  padding: 8px;
-		  display: block;
-	  }
-	  
-	  body:not(.deprev) aside > #list li > span:hover {
-		  background: gainsboro;
-		  cursor: pointer;
-	  }
-	  aside > #list li.watched > span::after {
-		  content: " ✓";
-		  color: orangered;
-	  }
+      aside > #list ul {
+          margin: 0;
+          padding: 0;
+      }
 
-	  aside > #list li.dir > span::before {
-		  content: "↳ ";
-		  font-weight: bold;
-		  color: orangered;
-	  }
-	  aside > #list li.dir.opened > span::before {
-		  content: "⬎ ";
-	  }
-	  aside > #list li.dir > ul {
-		  display: none;
-	  }
-	  aside > #list li.dir.opened > ul {
-		  display: block;
-		  border-left: 4px solid silver;
-	  }
+      aside > #list li {
+          padding: 0;
+          word-break: break-all;
+          list-style: none;
+      }
+      aside > #list li > span {
+          padding: 8px;
+          display: block;
+      }
 
-	  aside > #log {
-		  background: black;
-		  color: white;
-		  margin: 0;
-		  padding: 12px;
-		  width: calc(100% - 24px);
-		  height: 128px;
-		  overflow-wrap: break-word;
-		  overflow-y: auto;
-		  border-top: 1px solid gray;
-		  align-self: flex-end;
-		  font-family: monospace, monospace;
-	  }
+      body:not(.deprev) aside > #list li > span:hover {
+          background: gainsboro;
+          cursor: pointer;
+      }
+      aside > #list li.watched > span::after {
+          content: " ✓";
+          color: orangered;
+      }
 
-	  aside > #log > li {
-		  list-style: none;
-		  border-top: 1px solid gray;
-		  padding-top: 4px;
-		  margin: 4px 0;
-	  }
+      aside > #list li.dir > span::before {
+          content: "↳ ";
+          font-weight: bold;
+          color: orangered;
+      }
+      aside > #list li.dir.opened > span::before {
+          content: "⬎ ";
+      }
+      aside > #list li.dir > ul {
+          display: none;
+      }
+      aside > #list li.dir.opened > ul {
+          display: block;
+          border-left: 4px solid silver;
+      }
 
-	  aside > #log > li > a {
-		  color: inherit;
-	  }
+      aside > #log {
+          background: black;
+          color: white;
+          margin: 0;
+          padding: 12px;
+          width: calc(100% - 24px);
+          height: 128px;
+          overflow-wrap: break-word;
+          overflow-y: auto;
+          border-top: 1px solid gray;
+          align-self: flex-end;
+          font-family: monospace, monospace;
+      }
 
-	  aside > #log > li:first-of-type {
-		  border-top-width: 0;
-		  margin-top: 0;
-		  padding-top: 0;
-	  }
+      aside > #log > li {
+          list-style: none;
+          border-top: 1px solid gray;
+          padding-top: 4px;
+          margin: 4px 0;
+      }
 
-	  @media (max-width: 700px) {
-		  html, body { overflow: initial; width: unset; }
-		  html, body, main { min-width: unset; }
-		  main, video, aside { height: unset; min-height: 50vh; }
-		  main, aside { width: 100%; position: unset; }
-		  aside { background-color: unset; }
-		  aside > #list { overflow-y: initial; }
-		  aside > #log { display: table; height: 12em; border-top: 1px solid gray}
-	  }
+      aside > #log > li > a {
+          color: inherit;
+      }
 
-	  * {
-		  -webkit-user-select: none; /* Safari */
-		  -moz-user-select: none; /* Firefox */
-		  -ms-user-select: none; /* IE10+/Edge */
-		  user-select: none; /* Standard */
-	  }
-	</style>
+      aside > #log > li:first-of-type {
+          border-top-width: 0;
+          margin-top: 0;
+          padding-top: 0;
+      }
+
+      @media (max-width: 700px) {
+          html, body { overflow: initial; width: unset; }
+          html, body, main { min-width: unset; }
+          main, video, aside { height: unset; min-height: 50vh; }
+          main, aside { width: 100%; position: unset; }
+          aside { background-color: unset; }
+          aside > #list { overflow-y: initial; }
+          aside > #log { display: table; height: 12em; border-top: 1px solid gray}
+      }
+
+      * {
+          -webkit-user-select: none; /* Safari */
+          -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* IE10+/Edge */
+          user-select: none; /* Standard */
+      }
+    </style>
   </head>
   <body>
-	<main>
-	  <video id="video" controls preload="metadata">
-		Oh no! This browser doesn’t support HTML video.
-	  </video>
-	</main>
-	<aside>
-	  <header id="status">Nothing</header>
-	  <div id="list"></div>
-	  <ul id="log"></ul>		
-	</aside>
+    <main>
+      <video id="video" controls preload="metadata">
+        Oh no! This browser doesn’t support HTML video.
+      </video>
+    </main>
+    <aside>
+      <header id="status">Nothing</header>
+      <div id="list"></div>
+      <ul id="log"></ul>
+    </aside>
   </body>
   <script>
-	"use strict";
-	const root = document.documentElement;
-	const video = document.getElementById("video");
-	const list = document.getElementById("list");
-	const header = document.getElementById("status");
-	const log = document.getElementById("log");
+    "use strict";
+    const root = document.documentElement;
+    const video = document.getElementById("video");
+    const list = document.getElementById("list");
+    const header = document.getElementById("status");
+    const log = document.getElementById("log");
 
-	var uid = -1;
-	var tpad = 0.75;
-	var backli = {};
-	var opened = new Set();
-	var watched = JSON.parse(window.localStorage.getItem("watched")) || {};
-	var socket;
+    var uid = -1;
+    var tpad = 0.75;
+    var backli = {};
+    var opened = new Set();
+    var watched = JSON.parse(window.localStorage.getItem("watched")) || {};
+    var socket;
 
-	function send(op, data) {
-		if (socket) {
-			socket.send(JSON.stringify({
-				"op": op,
-				"data": data,
-				"from": uid
-			}));
-		}
-	}
+    function send(op, data) {
+        if (socket) {
+            socket.send(JSON.stringify({
+                "op": op,
+                "data": data,
+                "from": uid
+            }));
+        }
+    }
 
-	function logmsg(msg, color, user) {
-		let li = document.createElement("li");
-		li.innerHTML = "";
-		if (user) {
-			{{ with .UseWiki }}
-			li.innerHTML += "<a target=\"_blank\" href=\"{{ . }}/" + user + "\">" + user +
-		"</a> ";
-			{{ else }}
-			li.innerHTML += user + " ";
-			{{ end }}
-		}
-		li.innerHTML += msg;
-		li.style.color = color;
-		li.title = new Date();
-		log.appendChild(li);
-		log.scrollTop = log.scrollHeight - 12;
-	}
+    function logmsg(msg, color, user) {
+        let li = document.createElement("li");
+        li.innerHTML = "";
+        if (user) {
+            {{ with .UseWiki }}
+            li.innerHTML += "<a target=\"_blank\" href=\"{{ . }}/" + user + "\">" + user +
+                "</a> ";
+            {{ else }}
+            li.innerHTML += user + " ";
+            {{ end }}
+        }
+        li.innerHTML += msg;
+        li.style.color = color;
+        li.title = new Date();
+        log.appendChild(li);
+        log.scrollTop = log.scrollHeight - 12;
+    }
 
-	function loadtree(tree, parent) {
-		let ul = document.createElement("ul");
-		Object.keys(tree).map((name, idx) => {
-			let li = document.createElement("li");
-			let span = document.createElement("span");
-			span.appendChild(document.createTextNode(name));
-			li.appendChild(span);
+    function loadtree(tree, parent) {
+        let ul = document.createElement("ul");
+        Object.keys(tree).map((name, idx) => {
+            let li = document.createElement("li");
+            let span = document.createElement("span");
+            span.appendChild(document.createTextNode(name));
+            li.appendChild(span);
 
-			if ((typeof tree[name]) === 'string') {
-				span.onclick = _ => send("select", tree[name]);
-				if (tree[name] in watched) {
-					li.classList.add("watched");
-					li.title = watched[tree[name]];
-				}
-				backli[tree[name]] = li;
-			} else {
-				let selfname = parent + "/" + name;
-				if (opened.has(selfname))
-					li.classList.add("opened");
+            if ((typeof tree[name]) === 'string') {
+                span.onclick = _ => send("select", tree[name]);
+                if (tree[name] in watched) {
+                    li.classList.add("watched");
+                    li.title = watched[tree[name]];
+                }
+                backli[tree[name]] = li;
+            } else {
+                let selfname = parent + "/" + name;
+                if (opened.has(selfname))
+                    li.classList.add("opened");
 
-				span.onclick = _ => {
-					if (li.classList.contains("opened")) {
-						opened.delete(selfname);
-						li.classList.remove("opened");
-					} else {
-						opened.add(selfname);
-						li.classList.add("opened");
-					}
-				}
-				li.classList.add("dir");
-				
-				var subtree = loadtree(tree[name], name)
-				if (subtree) li.appendChild(subtree);
-			}
+                span.onclick = _ => {
+                    if (li.classList.contains("opened")) {
+                        opened.delete(selfname);
+                        li.classList.remove("opened");
+                    } else {
+                        opened.add(selfname);
+                        li.classList.add("opened");
+                    }
+                }
+                li.classList.add("dir");
 
-			ul.appendChild(li);
-		})
-		
-		return ul;
-	}
-		
-	function select(msg) {
-		while (video.firstChild)
-			video.firstChild.remove();
-		if (msg.data.match(/\.vtt$/)) {
-			var track = document.createElement("track");
-			track.kind = "subtitles";
-			track.src = "/data/" + msg.data;
-			track.label = "Subtitles";
-			video.appendChild(track);
-			video.textTracks[0].mode = "showing";
-			logmsg("selected subtitles " + msg.data,
-				   "lightsalmon", msg.name);
+                var subtree = loadtree(tree[name], name)
+                if (subtree) li.appendChild(subtree);
+            }
 
-		} else {
-			video.src = "/data/" + msg.data;
-			video.load();
-			video.currentTime = 0;
-			root.classList.add("loading");
-			header.innerText = msg.data;
-			logmsg("selected " + msg.data,
-				   "lightgreen", msg.name);
+            ul.appendChild(li);
+        })
 
-			var li = backli[msg.data];
-			if (li) {
-				li.classList.add("watched");
-				li.title = watched[msg.data] = new Date();
-				window.localStorage.setItem("watched", JSON.stringify(watched));
-			}
-		}
-	}
+        return ul;
+    }
 
-	function socket_msg(evt) {
-		var msg = JSON.parse(evt.data);
-		try {
-			switch (msg.op) {
-			case "list":
-				while (list.firstChild)
-					list.firstChild.remove();
-				list.appendChild(loadtree(msg.data, ""));
-				break;
-			case "pause":
-				if (msg.from != uid &&
-					uid != -1 &&
-					!video.paused) {
-					video.pause();
-				}
-				if (msg.name)
-					logmsg("paused video", "lightcoral", msg.name);
-				break;
-			case "play":
-				if (msg.from != uid &&
-					uid != -1 &&
-					video.paused) {
-					video.play();
-				}
-				if (msg.name)
-					logmsg("continued playback", "lightcyan", msg.name);
-				root.classList.remove("loading");
-				break;
-			case "time":
-				var hours   = Math.floor(msg.data / 3600);
-				var minutes = Math.floor((msg.data % 3600) / 60);
-				var seconds = Math.floor(msg.data % 60);
-				var hhmmss =
-					((hours   < 10) ? "0" + hours : hours) + ":" +
-					((minutes < 10) ? "0" + minutes : minutes) + ":"  +
-					((seconds < 10) ? "0" + seconds : seconds)
+    function select(msg) {
+        while (video.firstChild)
+            video.firstChild.remove();
+        if (msg.data.match(/\.vtt$/)) {
+            var track = document.createElement("track");
+            track.kind = "subtitles";
+            track.src = "/data/" + msg.data;
+            track.label = "Subtitles";
+            video.appendChild(track);
+            video.textTracks[0].mode = "showing";
+            logmsg("selected subtitles " + msg.data,
+                   "lightsalmon", msg.name);
 
-				if (msg.data && Math.abs(msg.data - video.currentTime) > tpad) {
-					logmsg("jumped to " + hhmmss, "blanchedalmond", msg.name);
-					video.currentTime = msg.data;
-				}
-				break;
-			case "tpad": tpad = msg.data; break;
-			case "uid": uid = msg.data; break;
-			case "select": select(msg); break;
-			case "msg": logmsg(msg.data); break;
-			case "leave": logmsg("has left", "silver", msg.name); break;
-			case "join": logmsg("joined" + (msg.data == uid ? " (this is you)" : ""),
-								"silver", msg.name); break;
-			case "pos": send("pos", video.currentTime); break;
-			case "who": logmsg("In this {{ .Name }}: " + msg.data.join(", "),
-							   "peachpuff"); break;
-			default:
-				logmsg("Recieved unknown message: <code>" + msg + "</code>");
-			}
-		} catch (e) {
-			console.log(e);
-		}
-	}
+        } else {
+            video.src = "/data/" + msg.data;
+            video.load();
+            video.currentTime = 0;
+            root.classList.add("loading");
+            header.innerText = msg.data;
+            logmsg("selected " + msg.data,
+                   "lightgreen", msg.name);
 
-	video.onplay = _ => send("play", video.currentTime);
-	video.onseeked = _ => video.pause();
-	video.oncanplay = _ => {
-		send("ready");
-		video.controls = true;
-		root.classList.remove("loading");
-	};
+            var li = backli[msg.data];
+            if (li) {
+                li.classList.add("watched");
+                li.title = watched[msg.data] = new Date();
+                window.localStorage.setItem("watched", JSON.stringify(watched));
+            }
+        }
+    }
 
-	function new_socket() {
-		let base = location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "");
-		let s = new WebSocket(base + "/socket?id={{ .Name }}");
+    function socket_msg(evt) {
+        var msg = JSON.parse(evt.data);
+        try {
+            switch (msg.op) {
+            case "list":
+                while (list.firstChild)
+                    list.firstChild.remove();
+                list.appendChild(loadtree(msg.data, ""));
+                break;
+            case "pause":
+                if (msg.from != uid &&
+                    uid != -1 &&
+                    !video.paused) {
+                    video.pause();
+                }
+                if (msg.name)
+                    logmsg("paused video", "lightcoral", msg.name);
+                break;
+            case "play":
+                if (msg.from != uid &&
+                    uid != -1 &&
+                    video.paused) {
+                    video.play();
+                }
+                if (msg.name)
+                    logmsg("continued playback", "lightcyan", msg.name);
+                root.classList.remove("loading");
+                break;
+            case "time":
+                var hours   = Math.floor(msg.data / 3600);
+                var minutes = Math.floor((msg.data % 3600) / 60);
+                var seconds = Math.floor(msg.data % 60);
+                var hhmmss =
+                    ((hours   < 10) ? "0" + hours : hours) + ":" +
+                    ((minutes < 10) ? "0" + minutes : minutes) + ":"  +
+                    ((seconds < 10) ? "0" + seconds : seconds)
 
-		s.onmessage = socket_msg;
-		s.onstalled = _ => send("wait");
-		s.onopen    = _ => send("join");
-		s.onclose   = new_socket;
+                if (msg.data && Math.abs(msg.data - video.currentTime) > tpad) {
+                    logmsg("jumped to " + hhmmss, "blanchedalmond", msg.name);
+                    video.currentTime = msg.data;
+                }
+                break;
+            case "tpad": tpad = msg.data; break;
+            case "uid": uid = msg.data; break;
+            case "select": select(msg); break;
+            case "msg": logmsg(msg.data); break;
+            case "leave": logmsg("has left", "silver", msg.name); break;
+            case "join": logmsg("joined" + (msg.data == uid ? " (this is you)" : ""),
+                                "silver", msg.name); break;
+            case "pos": send("pos", video.currentTime); break;
+            case "who": logmsg("In this {{ .Name }}: " + msg.data.join(", "),
+                               "peachpuff"); break;
+            default:
+                logmsg("Recieved unknown message: <code>" + msg + "</code>");
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
-		socket = s;
-	}
+    video.onplay = _ => send("play", video.currentTime);
+    video.onseeked = _ => video.pause();
+    video.oncanplay = _ => {
+        send("ready");
+        video.controls = true;
+        root.classList.remove("loading");
+    };
 
-	new_socket();
-	</script>
+    function new_socket() {
+        let base = location.href.replace(/^http/, "ws").replace(/\/[^\/]*?$/, "");
+        let s = new WebSocket(base + "/socket?id={{ .Name }}");
+
+        s.onmessage = socket_msg;
+        s.onstalled = _ => send("wait");
+        s.onopen    = _ => send("join");
+        s.onclose   = new_socket;
+
+        socket = s;
+    }
+
+    new_socket();
+  </script>
 </html>
