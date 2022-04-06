@@ -1,0 +1,154 @@
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-flow: column;
+    font-family: sans;
+    font-size: 12px;
+    min-width: 512px;
+    overflow: hidden;
+}
+
+main, aside {
+    position: absolute;
+}
+
+main {
+    background: black;
+    height: 100%;
+    width: calc(100% - 256px);
+    min-width: 256px;
+}
+
+main > video {
+    width: 100%;
+    height: 100%;
+}
+
+aside {
+    background: whitesmoke;
+    width: 256px;
+    height: 100%;
+    border-left: 1px solid gray;
+    display: flex;
+    flex-flow: column;
+    align-self: flex-end;
+}
+
+aside > header {
+    margin: 0;
+    padding: 12px;
+    border-bottom: 1px solid gray;
+    overflow-wrap: break-word;
+    font-family: monospace, monospace;
+    cursor: pointer;
+}
+
+aside > header { background: lightblue; }
+aside > header::before {
+    font-family: sans;
+    font-weight: bold;
+    content: "Watching ";
+}
+
+.loading aside > header {
+    background: lightpink;
+    cursor: default;
+}
+.loading aside > header::before {
+    content: "Loading ";
+}
+
+aside > #list {
+    list-style: none;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    background: white;
+    font-family: monospace, monospace;
+}
+
+aside > #list ul {
+    margin: 0;
+    padding: 0;
+}
+
+aside > #list li {
+    padding: 0;
+    word-break: break-all;
+    list-style: none;
+}
+aside > #list li > span {
+    padding: 8px;
+    display: block;
+}
+
+body:not(.deprev) aside > #list li > span:hover {
+    background: gainsboro;
+    cursor: pointer;
+}
+aside > #list span.seen::after {
+    content: " ✓";
+    color: orangered;
+}
+
+aside > #list li.dir > span::before {
+    content: "↳ ";
+    font-weight: bold;
+    color: orangered;
+}
+aside > #list li.dir.opened > span::before {
+    content: "⬎ ";
+}
+aside > #list li.dir > ul {
+    display: none;
+}
+aside > #list li.dir.opened > ul {
+    display: block;
+    border-left: 4px solid silver;
+}
+
+aside > #log {
+    background: lightgoldenrodyellow;
+    margin: 0;
+    padding: 12px;
+    width: calc(100% - 24px);
+    height: 128px;
+    overflow-wrap: break-word;
+    overflow-y: auto;
+    border-top: 1px solid gray;
+    align-self: flex-end;
+}
+
+aside > #log > li {
+    list-style: none;
+    padding-top: 4px;
+    margin: 4px 0;
+}
+
+aside > #log > li > a {
+    color: inherit;
+}
+
+aside > #log > li:first-of-type {
+    border-top-width: 0;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+@media (max-width: 700px) {
+    html, body { overflow: initial; width: unset; }
+    html, body, main { min-width: unset; }
+    main, video, aside { height: unset; min-height: 50vh; }
+    main, aside { width: 100%; position: unset; }
+    aside { background-color: unset; }
+    aside > #list { overflow-y: initial; }
+    aside > #log { display: table; height: 12em; border-top: 1px solid gray}
+}
