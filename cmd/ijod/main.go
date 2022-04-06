@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,7 +30,7 @@ func main() {
 	if *names != "" {
 		err = user.LoadNames(*names)
 		if err != nil {
-			log.Fatalf("Failed to read %s: %s", *names, err)
+			fmt.Fprintf(os.Stderr, "Failed to read %s: %s", *names, err)
 		}
 	}
 
@@ -39,14 +40,16 @@ func main() {
 		var err error
 		kc, err = auth.Load(*authd)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Fprintf(os.Stderr, "Failed to read auth file %s: %s",
+				*authd, err)
 		}
 	}
 
 	// Change directory before starting the server
 	err = os.Chdir(*dir)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "Failed to change directory %s: %s",
+			*dir, err)
 	}
 
 	// Enable debugging mode, if requested
