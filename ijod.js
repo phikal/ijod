@@ -30,7 +30,7 @@ function load(state) {
         let base = video.src.substr(video.src.lastIndexOf('/') + 1);
         write("<q>" + state.user + "</q> selected " + base);
     }
-    if (Math.abs(state.position - video.currentTime) > 0.2) {
+    if (Math.abs(state.position - video.currentTime) > 1) {
         video.currentTime = state.position;
     }
     if (state.playing) {
