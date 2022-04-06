@@ -9,7 +9,7 @@ import (
 	"ijod/tree"
 )
 
-const timeout = 5 * time.Second
+const timeout = 10 * time.Minute
 
 func (r *Room) daemon() {
 	var (
