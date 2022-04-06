@@ -31,7 +31,6 @@ func Message() *mesg.Message {
 			return nil
 		}))
 
-	// log.Print(flat)
 	return &mesg.Message{
 		Type: "files",
 		Data: flat["."],
