@@ -1,7 +1,6 @@
 package room
 
 import (
-	"context"
 	"log"
 	"time"
 
@@ -13,7 +12,7 @@ const timeout = 10 * time.Minute
 
 func (r *Room) daemon() {
 	var (
-		users   = make(map[*mesg.User]context.CancelFunc)
+		users   = make(map[*mesg.User]struct{})
 		current interface{}
 
 		// Send a message to everyone interested
@@ -41,7 +40,7 @@ func (r *Room) daemon() {
 
 		// Merge incoming messages into one channel
 		mux    = make(chan *mesg.Message)
-		manage = func(u *mesg.User, ctx context.Context) {
+		manage = func(u *mesg.User) {
 			for {
 				select {
 				case msg := <-u.In:
@@ -49,8 +48,9 @@ func (r *Room) daemon() {
 					log.Printf("Received %#v from %s@%s",
 						*msg, u.Name, r.Name)
 					mux <- msg
-				case <-ctx.Done():
+				case <-u.Ctx.Done():
 					log.Println("Kill", u.Name, "in", r.Name)
+					r.leave <- u
 					return
 				}
 			}
@@ -59,8 +59,8 @@ func (r *Room) daemon() {
 		tick = time.NewTicker(timeout)
 	)
 	defer func() {
-		for _, cf := range users {
-			cf()
+		for user := range users {
+			user.Kill()
 		}
 		tick.Stop()
 		r.Forget()
@@ -71,10 +71,8 @@ func (r *Room) daemon() {
 		select {
 		case user := <-r.enter:
 			log.Println(user.Name, "joined", r.Name)
-
-			var ctx context.Context
-			ctx, users[user] = context.WithCancel(context.Background())
-			go manage(user, ctx)
+			users[user] = struct{}{}
+			go manage(user)
 			user.Out <- &mesg.Message{
 				Type: "self",
 				Data: user.Name,

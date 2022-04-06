@@ -131,40 +131,49 @@ function display(tree, parent) {
 }
 
 // Websocket event handler
-function recv(event) {
-    var msg = JSON.parse(event.data);
+function recv(socket) {
+    return (event) => {
+        var msg = JSON.parse(event.data);
 
-    switch (msg.type) {
-    case "state":
-        load(msg.data);
-        break;
+        switch (msg.type) {
+        case "state":
+            load(msg.data);
+            break;
 
-    case "users":
-        users(msg.data);
-        break;
+        case "users":
+            users(msg.data);
+            break;
 
-    case "files":
-        // Clear the previous file tree
-        while (list.firstChild) {
-            list.firstChild.remove();
+        case "files":
+            // Clear the previous file tree
+            while (list.firstChild) {
+                list.firstChild.remove();
+            }
+
+            // Build a new tree
+            list.appendChild(display(msg.data, "/"));
+            break;
+
+        case "write":
+            write(msg.data);
+            break;
+
+        case "self":
+            self = msg.data;
+            write("You are <q>" + self + "</q>");
+            break;
+
+        case "ping":
+            socket.send(JSON.stringify({
+                "type": "pong",
+                "data": msg.data
+            }));
+            break;
+
+        default:
+            console.log("Received unknown message: " + msg);
         }
-
-        // Build a new tree
-        list.appendChild(display(msg.data, "/"));
-        break;
-
-    case "write":
-        write(msg.data);
-        break;
-
-    case "self":
-        self = msg.data;
-        write("You are <q>" + self + "</q>");
-        break;
-
-    default:
-        console.log("Received unknown message: " + msg);
-    }
+    };
 }
 
 // Initialisation function
@@ -174,7 +183,7 @@ function connect() {
         .replace(/\/room/, "/socket");
 
     let socket = new WebSocket(uri);
-    socket.onmessage = recv;
+    socket.onmessage = recv(socket);
     socket.onclose   = socket.onerror = event => {
         console.error(event);
         setTimeout(connect, 250);

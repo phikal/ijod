@@ -1,6 +1,9 @@
 package mesg
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 type Message struct {
 	Type string      `json:"type"`
@@ -10,6 +13,8 @@ type Message struct {
 
 type User struct {
 	Name string
+	Ctx  context.Context
+	Kill context.CancelFunc
 	In   chan *Message
 	Out  chan *Message
 }
