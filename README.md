@@ -31,13 +31,12 @@ to generate a listing of options.
 
   For .mp4 files, running
 
-		ffmpeg -i file.mp4 -movflags +faststart new-file.mp4
+      $ ffmpeg -i file.mp4 -movflags +faststart new-file.mp4
 
   with [FFmpeg][ffmpeg] should suffice to quickly create a streamable
   file. If not, consider converting it to the [WebM][webm] format using:
 
-		ffmpeg -i file.ext -c:v libvpx-vp9 -c:a libopus -movflags
-		+faststart file.webm
+      $ ffmpeg -i file.ext -c:v libvpx-vp9 -c:a libopus -movflags +faststart file.webm
 
 - Tools like [youtube-dl] should automatically produce files fit for
   streaming.
