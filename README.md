@@ -20,7 +20,7 @@ Given the `ijod` binary, run
 and a server should start listening on port 8080, on all hosts.  Use
 
 	$ ./ijod -help
-	
+
 to generate a listing of options.
 
 # Further Notes
