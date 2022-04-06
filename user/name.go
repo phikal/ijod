@@ -53,7 +53,7 @@ func nextName() string {
 	} else {
 		word = strconv.FormatInt(counter, 10)
 	}
-	atomic.AddInt64(&counter, counter+rand.Int63n(8))
+	atomic.AddInt64(&counter, counter+rand.Int63n(8)+1)
 
 	return word
 }
