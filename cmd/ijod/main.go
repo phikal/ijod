@@ -15,8 +15,8 @@ import (
 
 var (
 	listen = flag.String("listen", ":8080", "address to listen on")
-	authd  = flag.String("auth", "", "basic auth username and password (separated with \":\")")
-	names  = flag.String("names", "/usr/share/dict/words", "word-file to user for names")
+	authd  = flag.String("auth", "", "authentication password file")
+	names  = flag.String("names", "", "word-file to user for names")
 	dir    = flag.String("dir", ".", "directory to serve")
 	debug  = flag.Bool("debug", false, "turn debugging mode on")
 )
