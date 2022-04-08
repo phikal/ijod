@@ -184,9 +184,12 @@ function connect() {
 
     let socket = new WebSocket(uri);
     socket.onmessage = recv(socket);
-    socket.onclose   = socket.onerror = event => {
+    socket.onerror   = event => {
         console.error(event);
         setTimeout(connect, 250);
+    };
+    socket.onclose   = event => {
+        write("Connection closed");
     };
 
     let sync = (event) => {
