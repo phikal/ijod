@@ -32,10 +32,10 @@ main > video {
 }
 
 aside {
-    background: whitesmoke;
+    background: white;
     width: 256px;
     height: 100%;
-    border-left: 1px solid gray;
+    border-left: 1px solid silver;
     display: flex;
     flex-flow: column;
     align-self: flex-end;
@@ -44,25 +44,17 @@ aside {
 aside > header {
     margin: 0;
     padding: 12px;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid silver;
     overflow-wrap: break-word;
     font-family: monospace, monospace;
     cursor: pointer;
 }
 
-aside > header { background: lightblue; }
+aside > header { background: whitesmoke; }
 aside > header::before {
     font-family: sans;
     font-weight: bold;
     content: "Watching ";
-}
-
-.loading aside > header {
-    background: lightpink;
-    cursor: default;
-}
-.loading aside > header::before {
-    content: "Loading ";
 }
 
 aside > #list {
@@ -96,13 +88,13 @@ body:not(.deprev) aside > #list li > span:hover {
 }
 aside > #list span.seen::after {
     content: " ✓";
-    color: orangered;
+    color: royalblue;
 }
 
 aside > #list li.dir > span::before {
     content: "↳ ";
     font-weight: bold;
-    color: orangered;
+    color: royalblue;
 }
 aside > #list li.dir.opened > span::before {
     content: "⬎ ";
@@ -116,14 +108,14 @@ aside > #list li.dir.opened > ul {
 }
 
 aside > #log {
-    background: lightgoldenrodyellow;
+    background: whitesmoke;
     margin: 0;
     padding: 12px;
     width: calc(100% - 24px);
     height: 128px;
     overflow-wrap: break-word;
     overflow-y: auto;
-    border-top: 1px solid gray;
+    border-top: 1px solid silver;
     align-self: flex-end;
 }
 
@@ -150,5 +142,5 @@ aside > #log > li:first-of-type {
     main, aside { width: 100%; position: unset; }
     aside { background-color: unset; }
     aside > #list { overflow-y: initial; }
-    aside > #log { display: table; height: 12em; border-top: 1px solid gray}
+    aside > #log { display: table; height: 12em; border-top: 1px solid silver}
 }
