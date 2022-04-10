@@ -2,6 +2,7 @@ package user
 
 import (
 	"bufio"
+	"compress/bzip2"
 	"compress/gzip"
 	"io"
 	"math/rand"
@@ -22,17 +23,23 @@ func LoadNames(name string) (err error) {
 	if err != nil {
 		return
 	}
-
-	// Check if file is compressed
-	if strings.HasSuffix(name, ".gz") {
-		file, err = gzip.NewReader(file)
-		if err != nil {
-			return
-		}
-	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	var r io.Reader
+	// Check if file is compressed
+	switch {
+	case strings.HasSuffix(name, ".gz"):
+		r, err = gzip.NewReader(file)
+	case strings.HasSuffix(name, ".bz2"):
+		r = bzip2.NewReader(file)
+	default:
+		r = file
+	}
+	if err != nil {
+		return
+	}
+
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		name := strings.TrimSpace(scanner.Text())
 		words = append(words, name)
