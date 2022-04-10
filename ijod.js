@@ -191,6 +191,7 @@ function connect() {
     };
     socket.onclose   = event => {
         write("Connection closed");
+        setTimeout(connect, 250);
     };
 
     let sync = (event) => {
