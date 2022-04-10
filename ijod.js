@@ -186,6 +186,7 @@ function connect() {
     socket.onmessage = recv(socket);
     socket.onerror   = event => {
         console.error(event);
+        write("Connection error");
         setTimeout(connect, 250);
     };
     socket.onclose   = event => {
