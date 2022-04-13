@@ -8,6 +8,8 @@ const seen    = JSON.parse(window.localStorage.getItem("seen")) || {};
 
 var self;
 
+// function userfmt(name) { ... } is defined in userfmt.js
+
 function write(msg) {
     let li = document.createElement("li");
     li.innerHTML = msg;
@@ -29,7 +31,7 @@ function load(state) {
         seen[state.video] = new Date();
         window.localStorage.setItem("seen", JSON.stringify(seen));
         let base = video.src.substr(video.src.lastIndexOf('/') + 1);
-        write("<q>" + state.user + "</q> selected " + base);
+        write(userfmt(state.user) + " selected " + base);
     }
     if (Math.abs(state.position - video.currentTime) > 1) {
         video.currentTime = state.position;
@@ -48,19 +50,19 @@ function users(list) {
     if (!current) {
         list.forEach(user => {
             if (user != self) {
-                write("<q>" + user + "</q> is here");
+                write(userfmt(user) + " is here");
             }
         });
         current = list;
     }
     list.forEach(user => {
         if (!current.has(user)) {
-            write("<q>" + user + "</q> joined");
+            write(userfmt(user) + " joined");
         }
     });
     current.forEach(user => {
         if (!list.has(user)) {
-            write("<q>" + user + "</q> left");
+            write(userfmt(user) + " left");
         }
     });
     current = list;
@@ -162,7 +164,7 @@ function recv(socket) {
 
         case "self":
             self = msg.data;
-            write("You are <q>" + self + "</q>");
+            write("You are " + userfmt(self));
             break;
 
         case "ping":

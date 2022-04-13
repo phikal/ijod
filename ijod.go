@@ -13,7 +13,7 @@ import (
 var static embed.FS
 
 // Merge all functionality into a HTTP handler
-func Handler() http.Handler {
+func Handler() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/room", room.Display)

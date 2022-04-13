@@ -19,6 +19,7 @@ var (
 	names  = flag.String("names", "", "word-file to user for names")
 	dir    = flag.String("dir", ".", "directory to serve")
 	debug  = flag.Bool("debug", false, "turn debugging mode on")
+	wiki   = flag.String("wiki", "", "URL base for user links")
 )
 
 func main() {
@@ -59,7 +60,19 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 
+	mux := ijod.Handler()
+	namefmt := `function userfmt(name) { return "<q>" + name + "</q>"; }`
+	if *wiki != "" {
+		namefmt = `function userfmt(name) {
+    return "<a target=\"_blank\" href=\"` + *wiki + `" + name + "\">" + name + "</a>";
+}`
+	}
+	mux.HandleFunc("/namefmt.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", `text/javascript; charset=utf-8`)
+		fmt.Fprint(w, namefmt)
+	})
+
 	// Start the server
 	log.Printf("Listening on http://localhost%s", *listen)
-	log.Fatal(http.ListenAndServe(*listen, kc.Wrap(ijod.Handler())))
+	log.Fatal(http.ListenAndServe(*listen, kc.Wrap(mux)))
 }
