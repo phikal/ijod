@@ -20,6 +20,7 @@ function write(msg) {
 function load(state) {
     const diff = new Date() - new Date(state.timestamp);
     if (video.src != state.video) {
+        status.innerText = state.video;
         video.src = state.video;
         video.load();
         video.currentTime = state.position +
@@ -133,6 +134,7 @@ function display(tree, parent) {
 // Websocket event handler
 function recv(socket) {
     return (event) => {
+        console.log(event);
         var msg = JSON.parse(event.data);
 
         switch (msg.type) {
