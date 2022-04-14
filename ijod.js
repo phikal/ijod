@@ -28,8 +28,6 @@ function load(state) {
         video.currentTime = state.position +
             (state.playing ? diff : 0);
 
-        seen[state.video] = new Date();
-        window.localStorage.setItem("seen", JSON.stringify(seen));
         let base = video.src.substr(video.src.lastIndexOf('/') + 1);
         write(userfmt(state.user) + " selected " + base);
     }
@@ -92,8 +90,6 @@ function select(file) {
             let li = event.currentTarget;
             if (li) {
                 li.classList.add("seen");
-                li.title = seen[file] = new Date();
-                window.localStorage.setItem("seen", JSON.stringify(seen));
             }
         }
     }
@@ -199,6 +195,9 @@ function connect() {
     };
 
     let sync = (event) => {
+        seen[state.video] = new Date();
+        window.localStorage.setItem("seen", JSON.stringify(seen));
+
         socket.send(JSON.stringify({
             "type": "state",
             "data": {
