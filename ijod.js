@@ -195,7 +195,7 @@ function connect() {
     };
 
     let sync = (event) => {
-        seen[state.video] = new Date();
+        seen[video.src] = new Date();
         window.localStorage.setItem("seen", JSON.stringify(seen));
 
         socket.send(JSON.stringify({
