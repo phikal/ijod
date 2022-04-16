@@ -70,11 +70,11 @@ function users(list) {
 // File selection event handler generator
 function select(file) {
     return (event) => {
-        if (file.match(/\.vtt$/)) {
-            while (video.firstChild) {
-                video.firstChild.remove();
-            }
+        while (video.firstChild) {
+            video.firstChild.remove();
+        }
 
+        if (file.match(/\.vtt$/)) {
             var track = document.createElement("track");
             track.kind = "subtitles";
             track.src = "/data/" + file;
