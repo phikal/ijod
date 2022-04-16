@@ -2,6 +2,7 @@ package tree
 
 import (
 	"io/fs"
+	"log"
 	"path/filepath"
 
 	"ijod/mesg"
@@ -12,7 +13,7 @@ func Message() *mesg.Message {
 	type node map[string]interface{}
 
 	flat := node{".": make(node)}
-	filepath.WalkDir(".", fs.WalkDirFunc(
+	err := filepath.WalkDir(".", fs.WalkDirFunc(
 		func(path string, d fs.DirEntry, err error) error {
 			var ent interface{}
 
@@ -30,6 +31,10 @@ func Message() *mesg.Message {
 
 			return nil
 		}))
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
 
 	return &mesg.Message{
 		Type: "files",
