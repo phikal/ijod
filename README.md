@@ -21,7 +21,15 @@ and a server should start listening on port 8080, on all hosts.  Use
 
 	$ ./ijod -help
 
-to generate a listing of options.
+to generate a listing of options.  This is a fat, static binary so it
+can be copied wherever you might want to use it.
+
+If you don't want to build, then run Ijod, you can also do it all in
+one step:
+
+	$ go run ./cmd/ijod
+
+followed by any options you'd otherwise use.
 
 # Further Notes
 
