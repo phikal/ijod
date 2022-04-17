@@ -107,6 +107,16 @@ aside > #list li.dir.opened > ul {
     border-left: 4px solid silver;
 }
 
+aside > input#ytdl {
+    border-width: 0;
+    border-top: 1px solid silver;
+    padding: 6px;
+}
+
+aside > input:focus#ytdl {
+    outline: none;
+}
+
 aside > #log {
     background: whitesmoke;
     margin: 0;

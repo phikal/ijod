@@ -7,6 +7,7 @@ import (
 	"ijod/room"
 	"ijod/tree"
 	"ijod/user"
+	"ijod/ytdl"
 )
 
 //go:embed ijod.js index.html style.css
@@ -22,6 +23,10 @@ func Handler() *http.ServeMux {
 		http.Redirect(w, r, "/room?id="+room.Create(), http.StatusFound)
 	})
 	mux.Handle("/data/", http.StripPrefix("/data/", http.HandlerFunc(tree.Host)))
+	if ytdl.Handler != nil {
+		mux.Handle("/dl/", http.StripPrefix("/dl/", ytdl.Handler))
+	}
+
 	mux.Handle("/", http.FileServer(http.FS(static)))
 
 	return mux

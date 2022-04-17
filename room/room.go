@@ -2,6 +2,7 @@ package room
 
 import (
 	"log"
+	"os"
 	"sync"
 
 	"ijod/mesg"
@@ -16,6 +17,7 @@ type Room struct {
 	Name  string
 	enter chan *mesg.User
 	leave chan *mesg.User
+	files []string
 }
 
 func Create() string {
@@ -36,6 +38,10 @@ func Create() string {
 func (r *Room) Forget() {
 	defer lock.Unlock()
 	lock.Lock()
+
+	for _, file := range r.files {
+		os.Remove(file)
+	}
 
 	delete(rooms, r.Name)
 	log.Println("Forget room", r.Name)

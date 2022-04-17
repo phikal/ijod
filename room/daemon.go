@@ -2,10 +2,12 @@ package room
 
 import (
 	"log"
+	"path"
 	"time"
 
 	"ijod/mesg"
 	"ijod/tree"
+	"ijod/ytdl"
 )
 
 const timeout = 10 * time.Minute
@@ -54,6 +56,33 @@ func (r *Room) daemon() {
 					return
 				}
 			}
+
+		}
+
+		// Handle download requests
+		download = func(uri, user string) {
+			file, err := ytdl.Download(uri)
+			if err != nil {
+				log.Print(err)
+				return
+			}
+			// XXX: race condition possible
+			r.files = append(r.files, file)
+
+			video := path.Join("dl", path.Base(file))
+			mux <- &mesg.Message{
+				Type: "state",
+				Data: struct {
+					Ti string  `json:"timestamp"`
+					Po float64 `json:"position"`
+					Pl bool    `json:"playing"`
+					Vi string  `json:"video"`
+					Us string  `json:"user"`
+				}{
+					time.Now().Format(time.RFC3339),
+					0, false, video, user,
+				},
+			}
 		}
 
 		tick = time.NewTicker(timeout)
@@ -96,6 +125,10 @@ func (r *Room) daemon() {
 				broadcast(msg)
 			case "refresh":
 				msg.From.Out <- tree.Message()
+			case "download":
+				if uri, ok := msg.Data.(string); ok {
+					go download(uri, msg.From.Name)
+				}
 			}
 		case <-tick.C:
 			if len(users) == 0 {

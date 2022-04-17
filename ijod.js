@@ -3,6 +3,7 @@
 const video   = document.getElementById("video");
 const list    = document.getElementById("list");
 const status  = document.getElementById("status");
+const ytdl    = document.getElementById("ytdl");
 const log     = document.getElementById("log");
 const seen    = JSON.parse(window.localStorage.getItem("seen")) || {};
 
@@ -29,7 +30,7 @@ function load(state) {
             (state.playing ? diff : 0);
 
         let base = video.src.substr(video.src.lastIndexOf('/') + 1);
-        write(userfmt(state.user) + " selected " + base);
+        write(userfmt(state.user) + " selected " + decodeURI(base));
     }
     if (Math.abs(state.position - video.currentTime) > 1) {
         video.currentTime = state.position;
@@ -163,6 +164,9 @@ function recv(socket) {
             write("You are " + userfmt(self));
             break;
 
+        case "disable-dl":
+            ytdl.style.display = "none";
+
         case "ping":
             socket.send(JSON.stringify({
                 "type": "pong",
@@ -213,6 +217,23 @@ function connect() {
     video.onpause   = sync;
     video.onplay    = sync;
     video.oncanplay = sync;
+    ytdl.onkeyup    = (event) => {
+        if (event.keyCode !== 13) {
+            return;
+        }
+
+        event.preventDefault();
+        try {
+            socket.send(JSON.stringify({
+                "type": "download",
+                "data": ytdl.value
+            }));
+            ytdl.value = "";
+        } catch (err) {
+            console.error(err);
+        }
+
+    };
 
     status.onclick = (event) => {
         socket.send(JSON.stringify({"type": "refresh"}))
