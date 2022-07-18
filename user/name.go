@@ -25,6 +25,11 @@ func LoadNames(name string) (err error) {
 	}
 	defer file.Close()
 
+	name, err = os.Readlink(name)
+	if err != nil {
+		return err
+	}
+
 	var r io.Reader
 	// Check if file is compressed
 	switch {
