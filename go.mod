@@ -2,4 +2,4 @@ module ijod
 
 go 1.16
 
-require github.com/gorilla/websocket v1.5.0
+require nhooyr.io/websocket v1.8.7

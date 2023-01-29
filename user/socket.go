@@ -10,23 +10,21 @@ import (
 	"ijod/mesg"
 	"ijod/room"
 
-	ws "github.com/gorilla/websocket"
+	ws "nhooyr.io/websocket"
+	"nhooyr.io/websocket/wsjson"
 )
 
 var (
-	upgrader = ws.Upgrader{
-		WriteBufferSize: 1024,
-		ReadBufferSize:  1024,
-	}
 	timeout = 10 * time.Second
 )
 
 func Socket(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := ws.Accept(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	defer conn.Close(ws.StatusInternalError, "Premature disconnect")
 
 	id := r.URL.Query().Get("id")
 	room, ok := room.GetRoom(id)
@@ -41,10 +39,26 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		Ctx:  ctx,
 		Kill: kill,
 		In:   make(chan *mesg.Message),
-		Out:  make(chan *mesg.Message),
+		Out:  make(chan *mesg.Message,1),
 	}
 	room.Join(user)
 	defer room.Leave(user)
+
+	preselect := r.URL.Query().Get("select")
+	if preselect != ""{
+	user.Out <- &mesg.Message{
+		Type: "state",
+		Data: map[string]interface{}{
+			"timestamp": time.Now().Format(time.RFC3339),
+			"position": 0,
+			"video": `./data/` + preselect,
+			"playing": false,
+			"user": user.Name,
+		},
+		
+	}
+		
+	}
 
 	var ping int32
 	go func() {
@@ -62,7 +76,8 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		for {
 			var msg mesg.Message
-			if err = conn.ReadJSON(&msg); err != nil {
+			
+			if err = wsjson.Read(ctx, conn, &msg); err != nil {
 				log.Println(err)
 				break
 			}
@@ -84,12 +99,13 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		select {
 		case msg := <-user.Out:
 			log.Printf("[out] %s: %#v", user.Name, *msg)
-			err := conn.WriteJSON(*msg)
+			err := wsjson.Write(ctx, conn, msg)
 			if err != nil {
 				log.Println(err)
 				return
 			}
 		case <-ctx.Done():
+			conn.Close(ws.StatusNormalClosure, "Disconnected")
 			log.Println(user.Name, "died")
 			return
 		}
