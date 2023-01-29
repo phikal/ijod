@@ -10,6 +10,11 @@
           height: 100%;
           margin: 0;
           padding: 0;
+	  background: linear-gradient(40deg,
+				      rgb(50,0,25) 0%,
+				      rgb(0,25,50) 100%);
+	  color: white;
+	  font-family: system-ui;
       }
 
       body {
@@ -19,35 +24,41 @@
       }
 
       a#join {
-          background: dodgerblue;
+          background: linear-gradient(220deg,
+				      rgb(50,0,25) 0%,
+				      rgb(0,25,50) 100%);
+	  box-shadow: 0px 0px 20px black;
           color: white;
-          margin: 4px;
-          padding: 4px;
-          border-radius: 4px;
+          margin: 8px;
+          padding: 8px;
+          border-radius: 8px;
+	  font-size: 200%;
           text-decoration: none;
-          font-family: cursive;
       }
 
       footer {
           position: absolute;
-          bottom: 0;
+          bottom: 16px;
           width: 100%;
           text-align: center;
-          font-size: 80%;
+          font-size: smaller;
           opacity: 50%;
           margin: 4px;
+      }
+
+      a {
+	  color: lightblue;
       }
     </style>
   </head>
   <body>
-    <a id="join" title="Ijod" href="/new">Create</a>
+    <a id="join" title="Create a new room" href="/new">Create</a>
     <footer>
-      Ijod is <a href=""></a>
+      Ijod is
       <a href="https://www.fsf.org/about/what-is-free-software">Free Software</a> and
       <a href="https://git.sr.ht/~pkal/ijod">available</a>
       under the Terms and Conditions of the
       <a href="https://creativecommons.org/publicdomain/zero/1.0/legalcode">CC0 License</a>.
-
     </footer>
   </body>
 </html>
