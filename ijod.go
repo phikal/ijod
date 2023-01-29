@@ -20,7 +20,12 @@ func Handler() *http.ServeMux {
 	mux.HandleFunc("/room", room.Display)
 	mux.HandleFunc("/socket", user.Socket)
 	mux.HandleFunc("/new", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/room?id="+room.Create(), http.StatusFound)
+		url := r.URL
+		url.Path = "/room"
+		query := url.Query()
+		query.Add("id", room.Create())
+		url.RawQuery = query.Encode()
+		http.Redirect(w, r, url.String(), http.StatusFound)
 	})
 	mux.Handle("/data/", http.StripPrefix("/data/", http.HandlerFunc(tree.Host)))
 	if ytdl.Handler != nil {

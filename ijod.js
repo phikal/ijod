@@ -90,9 +90,11 @@ function select(file) {
 
             status.innerText = file;
 
-            let li = event.currentTarget;
-            if (li) {
-                li.classList.add("seen");
+            if (event) {
+                let li = event.currentTarget;
+                if (li) {
+                    li.classList.add("seen");
+                }
             }
         }
     }
@@ -197,11 +199,11 @@ function recv(socket) {
 
 // Initialisation function
 function connect() {
-    let uri = location.href
+    let ws = location.href
         .replace(/^http/, "ws")
         .replace(/\/room/, "/socket");
 
-    let socket = new WebSocket(uri);
+    let socket = new WebSocket(ws);
     socket.onmessage = recv(socket);
     socket.onerror   = event => {
         console.error(event);
@@ -253,6 +255,10 @@ function connect() {
     status.onclick = (event) => {
         socket.send(JSON.stringify({"type": "refresh"}))
     };
+
+    const url = new URL(window.location);
+    url.searchParams.delete("select");
+    window.history.pushState({}, '', url);
 
     return socket;
 }
