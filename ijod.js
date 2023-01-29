@@ -6,6 +6,7 @@ const status  = document.getElementById("status");
 const ytdl    = document.getElementById("ytdl");
 const log     = document.getElementById("log");
 const seen    = JSON.parse(window.localStorage.getItem("seen")) || {};
+const opened  = new Set(JSON.parse(window.sessionStorage.getItem("opened") || "[]"));
 
 var self;
 
@@ -23,7 +24,6 @@ function write(msg) {
 function load(state) {
     const diff = new Date() - new Date(state.timestamp);
     if (video.src != state.video) {
-        status.innerText = state.video;
         video.src = state.video;
         video.load();
         video.currentTime = state.position +
@@ -31,6 +31,8 @@ function load(state) {
 
         let base = video.src.substr(video.src.lastIndexOf('/') + 1);
         write(userfmt(state.user) + " selected " + decodeURI(base));
+
+        status.innerText = decodeURI(base);
     }
     if (Math.abs(state.position - video.currentTime) > 1) {
         video.currentTime = state.position;
@@ -104,6 +106,9 @@ function display(tree, parent) {
         let li = document.createElement("li");
         let span = document.createElement("span");
         span.appendChild(document.createTextNode(name));
+        if (opened.has(name)) {
+            li.classList.add("opened")
+        }
         li.appendChild(span);
 
         if ((typeof tree[name]) === 'string') {
@@ -118,7 +123,17 @@ function display(tree, parent) {
                 li.title = seen[tree[name]];
             }
         } else if (tree[name]) {
-            span.onclick = _ => li.classList.toggle("opened");
+            span.onclick = _ => {
+                li.classList.toggle("opened")
+                if (li.classList.contains("opened")) {
+                    opened.add(name);
+                } else {
+                    opened.delete(name);
+                }
+
+                let sopened = JSON.stringify(Array.from(opened));
+                window.sessionStorage.setItem("opened", sopened);
+            };
             li.classList.add("dir");
 
             li.appendChild(display(tree[name], name));

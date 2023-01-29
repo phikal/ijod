@@ -61,11 +61,17 @@ func nextName() string {
 	var word string
 
 	if words != nil {
-		word = words[int(counter)%len(words)]
+		// Calculate modulo, not the remainder
+		idx := int(counter) % len(words)
+		if idx < 0 {
+			idx += len(words)
+		}
+		word = words[idx]
+		atomic.AddInt64(&counter, counter+rand.Int63n(7)+1)
 	} else {
 		word = strconv.FormatInt(counter, 10)
+		atomic.AddInt64(&counter, 1)
 	}
-	atomic.AddInt64(&counter, counter+rand.Int63n(8)+1)
 
 	return word
 }

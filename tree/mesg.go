@@ -10,7 +10,13 @@ import (
 
 // Generate a "files" message with a tree
 func Message() *mesg.Message {
-	type node map[string]interface{}
+	type (
+		file struct {
+			Name string `json:"name"`
+			Dura string `json:"duration"`
+		}
+		node map[string]interface{}
+	)
 
 	flat := node{".": make(node)}
 	err := filepath.WalkDir(".", fs.WalkDirFunc(
