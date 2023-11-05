@@ -1,5 +1,6 @@
 "use strict";
 
+const body    = document.getElementsByTagName('body')[0];
 const video   = document.getElementById("video");
 const list    = document.getElementById("list");
 const status  = document.getElementById("status");
@@ -252,13 +253,10 @@ function connect() {
 
     };
 
-    status.onclick = (event) => {
-        socket.send(JSON.stringify({"type": "refresh"}))
-    };
-
     const url = new URL(window.location);
     url.searchParams.delete("select");
     window.history.pushState({}, '', url);
+    video.onauxclick = _ => body.classList.toggle("focus");
 
     return socket;
 }
