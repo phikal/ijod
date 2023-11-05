@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -14,9 +15,7 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
-var (
-	timeout = 10 * time.Second
-)
+var timeout = 10 * time.Second
 
 func Socket(w http.ResponseWriter, r *http.Request) {
 	conn, err := ws.Accept(w, r, nil)
@@ -26,6 +25,12 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(ws.StatusInternalError, "Premature disconnect")
 
+	ctx, kill := context.WithCancel(context.Background())
+	nconn := ws.NetConn(ctx, conn, ws.MessageText)
+	dec := json.NewDecoder(nconn)
+	enc := json.NewEncoder(nconn)
+	defer kill()
+
 	id := r.URL.Query().Get("id")
 	room, ok := room.GetRoom(id)
 	if !ok {
@@ -33,31 +38,29 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, kill := context.WithCancel(context.Background())
 	user := &mesg.User{
 		Name: nextName(),
 		Ctx:  ctx,
 		Kill: kill,
 		In:   make(chan *mesg.Message),
-		Out:  make(chan *mesg.Message,1),
+		Out:  make(chan *mesg.Message, 1),
 	}
 	room.Join(user)
 	defer room.Leave(user)
 
 	preselect := r.URL.Query().Get("select")
-	if preselect != ""{
-	user.Out <- &mesg.Message{
-		Type: "state",
-		Data: map[string]interface{}{
-			"timestamp": time.Now().Format(time.RFC3339),
-			"position": 0,
-			"video": `./data/` + preselect,
-			"playing": false,
-			"user": user.Name,
-		},
-		
-	}
-		
+	if preselect != "" {
+		user.Out <- &mesg.Message{
+			Type: "state",
+			Data: map[string]interface{}{
+				"timestamp": time.Now().Format(time.RFC3339),
+				"position":  0,
+				"video":     `./data/` + preselect,
+				"playing":   false,
+				"user":      user.Name,
+			},
+		}
+
 	}
 
 	var ping int32
@@ -76,7 +79,7 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		for {
 			var msg mesg.Message
-			
+
 			if err = wsjson.Read(ctx, conn, &msg); err != nil {
 				log.Println(err)
 				break
