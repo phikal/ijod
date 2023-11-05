@@ -6,6 +6,7 @@ const list    = document.getElementById("list");
 const status  = document.getElementById("status");
 const ytdl    = document.getElementById("ytdl");
 const log     = document.getElementById("log");
+const aside   = document.getElementsByTagName('aside')[0];
 const seen    = JSON.parse(window.localStorage.getItem("seen")) || {};
 const opened  = new Set(JSON.parse(window.sessionStorage.getItem("opened") || "[]"));
 
@@ -256,6 +257,8 @@ function connect() {
     const url = new URL(window.location);
     url.searchParams.delete("select");
     window.history.pushState({}, '', url);
+
+    aside.onauxclick = _ => socket.send(JSON.stringify({"type": "refresh"})); ;
     video.onauxclick = _ => body.classList.toggle("focus");
 
     return socket;
