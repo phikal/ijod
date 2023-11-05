@@ -97,7 +97,7 @@ func randName() string {
 			name = append(name, c)
 		}
 
-		if _, ok := rooms[string(name)]; !ok {
+		if !exists(string(name)) {
 			return string(name)
 		}
 	}

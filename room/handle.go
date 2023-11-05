@@ -8,9 +8,7 @@ import (
 )
 
 func exists(id string) bool {
-	lock.Lock()
-	_, ok := rooms[id]
-	lock.Unlock()
+	_, ok := rooms.Load(id)
 	return ok
 }
 
