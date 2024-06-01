@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -26,9 +25,6 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close(ws.StatusInternalError, "Premature disconnect")
 
 	ctx, kill := context.WithCancel(context.Background())
-	nconn := ws.NetConn(ctx, conn, ws.MessageText)
-	dec := json.NewDecoder(nconn)
-	enc := json.NewEncoder(nconn)
 	defer kill()
 
 	id := r.URL.Query().Get("id")
