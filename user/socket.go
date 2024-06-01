@@ -56,7 +56,6 @@ func Socket(w http.ResponseWriter, r *http.Request) {
 				"user":      user.Name,
 			},
 		}
-
 	}
 
 	var ping int32

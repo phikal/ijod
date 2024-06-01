@@ -56,7 +56,6 @@ func (r *Room) daemon() {
 					return
 				}
 			}
-
 		}
 
 		// Handle download requests
