@@ -32,6 +32,7 @@ func main() {
 		err = user.LoadNames(*names)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to read %s: %s", *names, err)
+			os.Exit(1)
 		}
 	}
 
@@ -43,6 +44,7 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to read auth file %s: %s",
 				*authd, err)
+			os.Exit(1)
 		}
 	}
 
@@ -51,6 +53,7 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to change directory %s: %s",
 			*dir, err)
+		os.Exit(1)
 	}
 
 	// Enable debugging mode, if requested
