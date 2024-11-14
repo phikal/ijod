@@ -221,13 +221,14 @@ function connect() {
         seen[video.src] = new Date();
         window.localStorage.setItem("seen", JSON.stringify(seen));
 
+        const url = new URL(video.src);
         socket.send(JSON.stringify({
             "type": "state",
             "data": {
                 "timestamp":  new Date(),
                 "position":   video.currentTime,
                 "playing":    !video.paused,
-                "video":      video.src,
+                "video":      url.pathname,
                 "user":       self
             }
         }));
