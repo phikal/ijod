@@ -47,7 +47,7 @@ func init() {
 		os.Exit(0)
 	}()
 
-	flag.StringVar(&executable, "dl", "youtube-dl",
+	flag.StringVar(&executable, "dl", "yt-dlp",
 		"Name or path of the youtube-dl script.")
 }
 
